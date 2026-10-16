@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- PLACEHOLDER: substituir pela foto real do banner (bg_banner_recife.jpg/png) e apagar este XML. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="360dp"
+    android:height="210dp"
+    android:viewportWidth="360"
+    android:viewportHeight="210">
+    <path android:fillColor="#1E293B" android:pathData="M0,0h360v210h-360z" />
+    <path android:fillColor="#D97736" android:pathData="M0,150 Q90,120 180,150 T360,150 V210 H0 Z" />
+</vector>

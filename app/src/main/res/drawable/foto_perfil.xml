@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- PLACEHOLDER: substituir pela foto de perfil (foto_perfil.jpg/png) e apagar este XML. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="44dp"
+    android:height="44dp"
+    android:viewportWidth="44"
+    android:viewportHeight="44">
+    <path android:fillColor="#F1E6DF" android:pathData="M0,0h44v44h-44z" />
+    <path android:fillColor="#D97736" android:pathData="M22,22m-8,0a8,8 0,1 1,16 0a8,8 0,1 1,-16 0" />
+    <path android:fillColor="#D97736" android:pathData="M8,44 Q22,26 36,44 Z" />
+</vector>
