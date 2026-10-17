@@ -1,0 +1,13 @@
+{
+  "name": "descubra-recife-seed",
+  "private": true,
+  "type": "module",
+  "description": "Cadastra as categorias e os locais iniciais no Firestore",
+  "scripts": {
+    "simular": "node seed.mjs --simular",
+    "cadastrar": "node seed.mjs"
+  },
+  "dependencies": {
+    "firebase-admin": "12.7.0"
+  }
+}

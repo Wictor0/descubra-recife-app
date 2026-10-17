@@ -16,3 +16,8 @@
 # Configuração do Firebase: cada membro baixa a sua do console (ver README)
 app/google-services.json
 app/src/*/google-services.json
+
+# Script de cadastro do catálogo: dependências e chave da conta de serviço (secreta!)
+tools/seed/node_modules/
+tools/seed/*-firebase-adminsdk-*.json
+tools/seed/chave*.json

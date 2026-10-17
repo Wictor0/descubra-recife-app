@@ -1,0 +1,154 @@
+{
+  "categorias": [
+    { "id": "historia", "nome": "História e Cultura", "icone": "museu", "slug": "historia" },
+    { "id": "arte", "nome": "Arte e Museus", "icone": "paleta", "slug": "arte" },
+    { "id": "praias", "nome": "Praias", "icone": "praia", "slug": "praias" },
+    { "id": "gastronomia", "nome": "Gastronomia e Mercados", "icone": "garfo", "slug": "gastronomia" },
+    { "id": "natureza", "nome": "Parques e Natureza", "icone": "arvore", "slug": "natureza" }
+  ],
+  "locais": [
+    {
+      "id": "marco-zero",
+      "titulo": "Marco Zero",
+      "descricao": "Praça no coração do Recife Antigo, ponto simbólico de fundação da cidade e palco de grandes eventos, como o Carnaval. Dali se vê o Parque das Esculturas, do outro lado do rio.",
+      "endereco": "Praça Rio Branco, Recife Antigo",
+      "custoAcesso": "Gratuito",
+      "horarioFuncionamento": "Aberto 24h",
+      "contato": "",
+      "latitude": -8.0631, "longitude": -34.8711,
+      "categoriaIds": ["historia"]
+    },
+    {
+      "id": "rua-do-bom-jesus",
+      "titulo": "Rua do Bom Jesus",
+      "descricao": "Uma das ruas mais antigas do Recife, com casarões coloridos, bares e feirinha de artesanato aos domingos. Foi a antiga Rua dos Judeus.",
+      "endereco": "Rua do Bom Jesus, Recife Antigo",
+      "custoAcesso": "Gratuito",
+      "horarioFuncionamento": "Aberto 24h (feira aos domingos)",
+      "contato": "",
+      "latitude": -8.0617, "longitude": -34.8712,
+      "categoriaIds": ["historia"]
+    },
+    {
+      "id": "sinagoga-kahal-zur-israel",
+      "titulo": "Sinagoga Kahal Zur Israel",
+      "descricao": "Primeira sinagoga das Américas, fundada no período holandês. Hoje funciona como centro cultural judaico e museu.",
+      "endereco": "Rua do Bom Jesus, 197, Recife Antigo",
+      "custoAcesso": "Pago (consultar valores)",
+      "horarioFuncionamento": "Terça a domingo (consultar horário)",
+      "contato": "",
+      "latitude": -8.0618, "longitude": -34.8713,
+      "categoriaIds": ["historia"]
+    },
+    {
+      "id": "paco-do-frevo",
+      "titulo": "Paço do Frevo",
+      "descricao": "Espaço dedicado ao frevo, Patrimônio Imaterial da Humanidade, com exposições, acervo de estandartes e escola de dança e música.",
+      "endereco": "Praça do Arsenal da Marinha, Recife Antigo",
+      "custoAcesso": "Pago (consultar valores)",
+      "horarioFuncionamento": "Terça a domingo (consultar horário)",
+      "contato": "",
+      "latitude": -8.0612, "longitude": -34.8719,
+      "categoriaIds": ["historia", "arte"]
+    },
+    {
+      "id": "cais-do-sertao",
+      "titulo": "Museu Cais do Sertão",
+      "descricao": "Museu interativo sobre a cultura do sertão nordestino e a obra de Luiz Gonzaga, às margens do porto do Recife.",
+      "endereco": "Av. Alfredo Lisboa, Recife Antigo",
+      "custoAcesso": "Pago (consultar valores)",
+      "horarioFuncionamento": "Terça a domingo (consultar horário)",
+      "contato": "",
+      "latitude": -8.0602, "longitude": -34.8702,
+      "categoriaIds": ["arte", "historia"]
+    },
+    {
+      "id": "parque-das-esculturas",
+      "titulo": "Parque das Esculturas Francisco Brennand",
+      "descricao": "Conjunto de esculturas de Francisco Brennand sobre o arrecife em frente ao Marco Zero, com a Torre de Cristal. O acesso é de barco ou a pé pelo Molhe do Brum.",
+      "endereco": "Arrecifes em frente ao Marco Zero, Recife Antigo",
+      "custoAcesso": "Gratuito (travessia de barco paga)",
+      "horarioFuncionamento": "Durante o dia",
+      "contato": "",
+      "latitude": -8.0627, "longitude": -34.8680,
+      "categoriaIds": ["arte"]
+    },
+    {
+      "id": "oficina-brennand",
+      "titulo": "Oficina Francisco Brennand",
+      "descricao": "Antiga olaria transformada em museu-ateliê, com milhares de esculturas e painéis cerâmicos de Francisco Brennand cercados por mata atlântica.",
+      "endereco": "Propriedade Santos Cosme e Damião, Várzea",
+      "custoAcesso": "Pago (consultar valores)",
+      "horarioFuncionamento": "Terça a domingo (consultar horário)",
+      "contato": "",
+      "latitude": -8.0414, "longitude": -34.9668,
+      "categoriaIds": ["arte", "natureza"]
+    },
+    {
+      "id": "instituto-ricardo-brennand",
+      "titulo": "Instituto Ricardo Brennand",
+      "descricao": "Complexo em estilo de castelo com pinacoteca de pinturas do Brasil holandês, coleção de armas brancas e biblioteca, em meio a jardins.",
+      "endereco": "Alameda Antônio Brennand, Várzea",
+      "custoAcesso": "Pago (consultar valores)",
+      "horarioFuncionamento": "Terça a domingo (consultar horário)",
+      "contato": "",
+      "latitude": -8.0464, "longitude": -34.9600,
+      "categoriaIds": ["arte", "historia"]
+    },
+    {
+      "id": "casa-da-cultura",
+      "titulo": "Casa da Cultura",
+      "descricao": "Antiga Casa de Detenção do Recife, cujas celas viraram lojas de artesanato pernambucano. Ótima parada para lembranças.",
+      "endereco": "Rua Floriano Peixoto, São José",
+      "custoAcesso": "Gratuito",
+      "horarioFuncionamento": "Segunda a sábado (consultar horário)",
+      "contato": "",
+      "latitude": -8.0666, "longitude": -34.8822,
+      "categoriaIds": ["historia", "gastronomia"]
+    },
+    {
+      "id": "mercado-sao-jose",
+      "titulo": "Mercado de São José",
+      "descricao": "Mercado público em estrutura de ferro do século XIX, com artesanato, ervas, frutas e comidas regionais.",
+      "endereco": "Praça Dom Vital, São José",
+      "custoAcesso": "Gratuito",
+      "horarioFuncionamento": "Segunda a sábado (consultar horário)",
+      "contato": "",
+      "latitude": -8.0687, "longitude": -34.8786,
+      "categoriaIds": ["gastronomia", "historia"]
+    },
+    {
+      "id": "praia-boa-viagem",
+      "titulo": "Praia de Boa Viagem",
+      "descricao": "Principal praia urbana do Recife, com calçadão, quiosques e piscinas naturais na maré baixa. Respeite as placas de alerta de tubarão.",
+      "endereco": "Av. Boa Viagem, Boa Viagem",
+      "custoAcesso": "Gratuito",
+      "horarioFuncionamento": "Aberto 24h",
+      "contato": "",
+      "latitude": -8.1260, "longitude": -34.8990,
+      "categoriaIds": ["praias"]
+    },
+    {
+      "id": "praia-do-pina",
+      "titulo": "Praia do Pina",
+      "descricao": "Praia vizinha a Boa Viagem, mais próxima do centro, com faixa de areia larga e vista para o Parque Dona Lindu.",
+      "endereco": "Av. Boa Viagem, Pina",
+      "custoAcesso": "Gratuito",
+      "horarioFuncionamento": "Aberto 24h",
+      "contato": "",
+      "latitude": -8.0945, "longitude": -34.8810,
+      "categoriaIds": ["praias"]
+    },
+    {
+      "id": "parque-da-jaqueira",
+      "titulo": "Parque da Jaqueira",
+      "descricao": "Um dos maiores parques urbanos do Recife, com pista de cooper, ciclovia, playground e a capela de Nossa Senhora da Conceição.",
+      "endereco": "Av. Rui Barbosa, Jaqueira",
+      "custoAcesso": "Gratuito",
+      "horarioFuncionamento": "Diariamente (consultar horário)",
+      "contato": "",
+      "latitude": -8.0375, "longitude": -34.9025,
+      "categoriaIds": ["natureza"]
+    }
+  ]
+}

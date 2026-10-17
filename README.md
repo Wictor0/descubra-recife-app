@@ -48,6 +48,24 @@ Pelo terminal:
 
 > O `google-services.json` está no `.gitignore`. Cada membro do grupo baixa o seu do console, e ele nunca vai para o repositório.
 
+### Cadastrando o catálogo inicial
+
+As regras do Firestore não deixam o app gravar categorias e locais. Por isso, o catálogo inicial (5 categorias e 13 pontos turísticos do Recife, em [`tools/seed/dados.json`](tools/seed/dados.json)) é enviado por um script que usa uma chave de administrador. Para rodar, é preciso ter o Node.js instalado.
+
+1. No console do Firebase, abra **Configurações do projeto → Contas de serviço → Gerar nova chave privada**. Salve o arquivo em `tools/seed/`.
+2. Rode:
+   ```bash
+   cd tools/seed
+   npm install
+   npm run simular                                   # lista o que vai ser gravado
+   node seed.mjs descubra-recife-firebase-adminsdk-XXXX.json
+   ```
+3. Confira os dados em **Firestore Database → Dados**. Rodar o script de novo só atualiza os mesmos documentos, sem duplicar nada.
+
+> ⚠️ A chave dá acesso total ao projeto. Ela está no `.gitignore` e **não pode ir para o GitHub nem ser compartilhada**. Depois do cadastro, você pode apagar o arquivo e revogar a chave no console.
+
+Para mudar ou adicionar locais, edite o `dados.json` e rode o script de novo. As coordenadas são aproximadas, então vale conferir cada uma no Google Maps. Horários e valores devem ser confirmados nos canais oficiais de cada local.
+
 ### Ambientes (seção 12)
 
 | Ambiente | Variante Gradle | applicationId |
@@ -86,6 +104,8 @@ app/src/main/java/com/descubra/recife/
 │   ├── navigation/NavHost.kt    # rotas e navegação
 │   └── screens/                 # auth, home, busca, local, roteiro, perfil, faq
 └── util/Mapas.kt                # "Como chegar" via Intent (ADR-004)
+
+tools/seed/                      # script que cadastra o catálogo inicial no Firestore
 ```
 
 ### Modelo de dados no Firestore
@@ -129,7 +149,8 @@ Continuam em aberto: a estratégia de backup e o critério de exclusão e reten�
 
 ## 3. Próximos passos
 
-- [ ] Criar o projeto no Firebase e cadastrar o catálogo real (categorias e locais)
+- [x] Criar o projeto no Firebase (`descubra-recife`, apps dev e prod)
+- [ ] Rodar o script de cadastro do catálogo e revisar as coordenadas
 - [ ] Trocar os placeholders `bg_banner_recife` e `foto_perfil` pelas imagens do grupo
 - [ ] Aplicar o visual do protótipo nas telas Início, Busca, Local e Roteiro (a FAQ já está pronta)
 - [ ] Exibir fotos dos locais (carregar `imagens` com Coil)
