@@ -8,8 +8,12 @@ data class Cliente(
     val nome: String,
     val email: String,
     val dataNascimento: String? = null,
-    val telefone: String? = null
-)
+    val telefone: String? = null,
+    val genero: String? = null
+) {
+    val primeiroNome: String get() = nome.trim().substringBefore(' ').ifBlank { "Visitante" }
+    val inicial: String get() = primeiroNome.take(1).uppercase()
+}
 
 data class Categoria(
     val id: String,
@@ -29,7 +33,11 @@ data class Local(
     val latitude: Double,
     val longitude: Double,
     val categoriaIds: List<String> = emptyList(),
-    val imagens: List<String> = emptyList()
+    val imagens: List<String> = emptyList(),
+    /** "popular" ou "recomendado": em qual seção da tela inicial o local aparece. */
+    val destaque: String? = null,
+    /** Bairro, mostrado nos cards (o endereço completo fica no detalhe). */
+    val bairro: String = ""
 )
 
 data class Avaliacao(
@@ -51,3 +59,15 @@ data class Roteiro(
     val dataGeracao: Long,
     val locais: List<Local>
 )
+
+/** Regras do roteiro do Cliente, separadas para poderem ser testadas sem Android. */
+object RoteiroRegras {
+    /** O roteiro do protótipo é um só por Cliente ("Seu Roteiro"). */
+    const val ID_ROTEIRO_ATUAL = "atual"
+
+    fun comLocal(locais: List<Local>, local: Local): List<Local> =
+        if (locais.any { it.id == local.id }) locais else locais + local
+
+    fun semLocal(locais: List<Local>, localId: String): List<Local> =
+        locais.filterNot { it.id == localId }
+}

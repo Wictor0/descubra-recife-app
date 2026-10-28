@@ -12,12 +12,13 @@ import com.descubra.recife.data.repository.FirebaseAuthRepository
 import com.descubra.recife.data.repository.FirestoreAvaliacaoRepository
 import com.descubra.recife.data.repository.FirestoreCatalogoRepository
 import com.descubra.recife.data.repository.FirestoreRoteiroRemoto
-import com.descubra.recife.data.repository.RascunhoRoteiro
+import com.descubra.recife.data.repository.RoteiroDoCliente
 import com.descubra.recife.data.repository.RoteiroRepository
 import com.descubra.recife.data.repository.RoteiroRepositoryImpl
 import com.google.firebase.FirebaseApp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import kotlinx.coroutines.flow.MutableStateFlow
 
 /**
  * Injeção de dependências manual: cria cada repositório uma vez só.
@@ -33,7 +34,10 @@ class AppContainer(context: Context) {
     val catalogoRepository: CatalogoRepository
     val avaliacaoRepository: AvaliacaoRepository
     val roteiroRepository: RoteiroRepository
-    val rascunhoRoteiro = RascunhoRoteiro()
+    val roteiroDoCliente: RoteiroDoCliente
+
+    /** Modo escuro escolhido no menu lateral; null = seguir o sistema. */
+    val modoEscuro = MutableStateFlow<Boolean?>(null)
 
     init {
         if (usandoFirebase) {
@@ -48,5 +52,6 @@ class AppContainer(context: Context) {
             avaliacaoRepository = AvaliacaoRepositoryDemo()
             roteiroRepository = RoteiroRepositoryImpl(database.roteiroDao(), remoto = null)
         }
+        roteiroDoCliente = RoteiroDoCliente(authRepository, roteiroRepository)
     }
 }

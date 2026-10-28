@@ -81,7 +81,7 @@ fun TelaComBarra(
     content: @Composable BoxScope.() -> Unit
 ) {
     Box(modifier = Modifier.fillMaxSize()) {
-        Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
+        Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.surface) {
             Box(Modifier.fillMaxSize(), content = content)
         }
         Box(

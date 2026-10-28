@@ -21,3 +21,6 @@ app/src/*/google-services.json
 tools/seed/node_modules/
 tools/seed/*-firebase-adminsdk-*.json
 tools/seed/chave*.json
+
+# Cache do compilador Kotlin
+.kotlin/

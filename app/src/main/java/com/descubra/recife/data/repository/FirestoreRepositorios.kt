@@ -12,13 +12,13 @@ import kotlinx.coroutines.tasks.await
 class FirestoreCatalogoRepository(private val db: FirebaseFirestore) : CatalogoRepository {
 
     override suspend fun categorias(): List<Categoria> =
-        db.collection(FirestoreColecoes.CATEGORIAS).orderBy("nome").get().await()
-            .documents.map { it.paraCategoria() }
+        db.collection(FirestoreColecoes.CATEGORIAS).get().await()
+            .documents.sortedWith(porOrdem).map { it.paraCategoria() }
 
     override suspend fun locais(categoriaId: String?): List<Local> {
         val colecao = db.collection(FirestoreColecoes.LOCAIS)
         val consulta = if (categoriaId == null) colecao else colecao.whereArrayContains("categoriaIds", categoriaId)
-        return consulta.get().await().documents.map { it.paraLocal() }
+        return consulta.get().await().documents.sortedWith(porOrdem).map { it.paraLocal() }
     }
 
     override suspend fun local(id: String): Local? {
@@ -89,6 +89,9 @@ class FirestoreRoteiroRemoto(
         }
 }
 
+/** Ordem definida no campo "ordem" (a do protótipo); sem ele, vai para o fim, por id. */
+private val porOrdem = compareBy<DocumentSnapshot>({ it.getLong("ordem") ?: Long.MAX_VALUE }, { it.id })
+
 private fun DocumentSnapshot.paraCategoria() = Categoria(
     id = id,
     nome = getString("nome").orEmpty(),
@@ -108,5 +111,7 @@ private fun DocumentSnapshot.paraLocal() = Local(
     latitude = getDouble("latitude") ?: 0.0,
     longitude = getDouble("longitude") ?: 0.0,
     categoriaIds = get("categoriaIds") as? List<String> ?: emptyList(),
-    imagens = get("imagens") as? List<String> ?: emptyList()
+    imagens = get("imagens") as? List<String> ?: emptyList(),
+    destaque = getString("destaque"),
+    bairro = getString("bairro").orEmpty()
 )

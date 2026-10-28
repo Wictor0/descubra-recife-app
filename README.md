@@ -123,6 +123,20 @@ As associativas `Categoria_Local` e `Roteiro_Local` do documento viram os arrays
 
 No **Room**, as tabelas `roteiros` e `roteiro_locais` guardam uma cópia de cada roteiro com os dados básicos dos locais. Assim o roteiro abre mesmo sem internet (RA-004).
 
+### Interface (protótipo do grupo)
+
+As telas seguem o protótipo do Figma: splash com a máscara, login, cadastro, início, menu lateral, editar perfil, roteiro e FAQ. A tela de detalhe do local não estava no protótipo e usa o mesmo estilo das outras.
+
+- **Fonte:** Poppins (`res/font`).
+- **Cores:** laranja `#D97736`, pêssego `#FFD8B1` e a textura de cerâmica no topo das telas.
+- **Regra de contraste:** todo texto e ícone sobre laranja é branco (`SobreLaranja` em `ui/theme/Theme.kt`).
+- **Imagens:** o banner, a máscara, os ícones das categorias e as fotos dos locais foram recortados do protótipo e ficam em `res/drawable-nodpi`. Locais sem foto mostram a textura do banner.
+- **Ajustes de usabilidade em relação ao protótipo:**
+  - Os cards de destino mostram nome e bairro em branco sobre um degradê, em vez da etiqueta minúscula.
+  - O "Seu Roteiro" vira um roteiro único por cliente, salvo a cada local adicionado.
+  - Os textos do cadastro foram passados para o português do Brasil.
+  - O "Código de confirmação" e o login com Google ficam para uma próxima etapa.
+
 ### Rastreabilidade (seção 25)
 
 | Requisito | Onde está no código |
@@ -151,7 +165,8 @@ Continuam em aberto: a estratégia de backup e o critério de exclusão e reten�
 
 - [x] Criar o projeto no Firebase (`descubra-recife`, apps dev e prod)
 - [ ] Rodar o script de cadastro do catálogo e revisar as coordenadas
-- [ ] Trocar os placeholders `bg_banner_recife` e `foto_perfil` pelas imagens do grupo
-- [ ] Aplicar o visual do protótipo nas telas Início, Busca, Local e Roteiro (a FAQ já está pronta)
+- [ ] Foto de perfil do cliente (hoje o avatar mostra a inicial do nome)
+- [x] Aplicar o visual do protótipo nas telas
+- [ ] Trocar as fotos recortadas do protótipo por fotos em boa resolução
 - [ ] Exibir fotos dos locais (carregar `imagens` com Coil)
 - [ ] Ajustar a FAQ: ela cita exportação em PDF, que no documento é evolução futura (seção 24)

@@ -8,6 +8,7 @@
 //   node seed.mjs caminho/da/chave.json     grava no Firestore
 //
 // Os ids dos documentos são fixos, então rodar de novo só atualiza, sem duplicar.
+// Categorias e locais que saíram do dados.json são apagados do Firestore.
 
 import { readFile } from "node:fs/promises";
 
@@ -47,7 +48,19 @@ const db = getFirestore();
 
 const lote = db.batch();
 for (const d of documentos) lote.set(db.collection(d.colecao).doc(d.id), d.campos);
+
+const removidos = [];
+for (const colecao of ["categorias", "locais"]) {
+  const ids = new Set(documentos.filter((d) => d.colecao === colecao).map((d) => d.id));
+  for (const doc of (await db.collection(colecao).get()).docs) {
+    if (!ids.has(doc.id)) {
+      lote.delete(doc.ref);
+      removidos.push(`${colecao}/${doc.id}`);
+    }
+  }
+}
 await lote.commit();
+if (removidos.length) console.log("Removidos (não estão mais no dados.json):", removidos.join(", "));
 
 console.log(`Projeto ${chave.project_id}: ${dados.categorias.length} categorias e ${dados.locais.length} locais gravados.`);
 

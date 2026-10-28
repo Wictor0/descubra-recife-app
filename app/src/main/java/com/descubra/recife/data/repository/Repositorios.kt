@@ -20,9 +20,12 @@ interface AuthRepository {
         email: String,
         senha: String,
         dataNascimento: String?,
-        telefone: String?
+        genero: String?
     ): Result<Unit>
     suspend fun clienteAtual(): Cliente?
+    suspend fun atualizarPerfil(nome: String, dataNascimento: String?): Result<Unit>
+    /** Envia o e-mail de troca de senha do Firebase. */
+    suspend fun redefinirSenha(): Result<Unit>
     fun sair()
 }
 

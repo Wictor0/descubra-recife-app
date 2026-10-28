@@ -4,6 +4,7 @@ import com.descubra.recife.data.remote.FirestoreColecoes
 import com.descubra.recife.domain.model.Cliente
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.SetOptions
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.tasks.await
@@ -31,31 +32,46 @@ class FirebaseAuthRepository(
         email: String,
         senha: String,
         dataNascimento: String?,
-        telefone: String?
+        genero: String?
     ): Result<Unit> = runCatching {
         val uid = auth.createUserWithEmailAndPassword(email, senha).await().user!!.uid
-        db.collection(FirestoreColecoes.CLIENTES).document(uid).set(
+        perfil(uid).set(
             mapOf(
                 "nome" to nome,
                 "email" to email,
                 "dataNascimento" to dataNascimento,
-                "telefone" to telefone
+                "genero" to genero
             )
         ).await()
         Unit
     }
 
     override suspend fun clienteAtual(): Cliente? {
-        val uid = auth.currentUser?.uid ?: return null
-        val doc = db.collection(FirestoreColecoes.CLIENTES).document(uid).get().await()
+        val usuario = auth.currentUser ?: return null
+        val doc = perfil(usuario.uid).get().await()
         return Cliente(
-            id = uid,
+            id = usuario.uid,
             nome = doc.getString("nome").orEmpty(),
-            email = doc.getString("email") ?: auth.currentUser?.email.orEmpty(),
+            email = doc.getString("email") ?: usuario.email.orEmpty(),
             dataNascimento = doc.getString("dataNascimento"),
-            telefone = doc.getString("telefone")
+            telefone = doc.getString("telefone"),
+            genero = doc.getString("genero")
         )
     }
 
+    override suspend fun atualizarPerfil(nome: String, dataNascimento: String?): Result<Unit> = runCatching {
+        val uid = auth.currentUser?.uid ?: error("Faça login novamente")
+        perfil(uid).set(mapOf("nome" to nome, "dataNascimento" to dataNascimento), SetOptions.merge()).await()
+        Unit
+    }
+
+    override suspend fun redefinirSenha(): Result<Unit> = runCatching {
+        val email = auth.currentUser?.email ?: error("Faça login novamente")
+        auth.sendPasswordResetEmail(email).await()
+        Unit
+    }
+
     override fun sair() = auth.signOut()
+
+    private fun perfil(uid: String) = db.collection(FirestoreColecoes.CLIENTES).document(uid)
 }
