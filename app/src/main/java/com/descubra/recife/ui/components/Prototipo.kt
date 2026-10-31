@@ -19,6 +19,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
@@ -196,7 +197,7 @@ fun CardDestino(local: Local, onClick: () -> Unit, modifier: Modifier = Modifier
             .clickable(onClick = onClick)
     ) {
         FotoLocal(local, Modifier.fillMaxSize())
-        Legenda(local, tituloSp = 12f, Modifier.align(Alignment.BottomStart), maxLinhas = 3)
+        Legenda(local, tituloSp = 12f, Modifier.align(Alignment.BottomStart), maxLinhas = 4)
     }
 }
 
@@ -260,7 +261,7 @@ fun CirculoCategoria(categoria: Categoria, selecionada: Boolean, onClick: () -> 
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(6.dp),
         modifier = Modifier
-            .width(100.dp)
+            .widthIn(min = 100.dp)
             .clip(RoundedCornerShape(12.dp))
             .clickable(onClick = onClick)
     ) {

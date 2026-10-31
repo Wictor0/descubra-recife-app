@@ -1,5 +1,6 @@
 package com.descubra.recife.ui.components
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -28,6 +29,7 @@ import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -38,6 +40,7 @@ import androidx.compose.ui.unit.sp
 import com.descubra.recife.ui.theme.Laranja
 import com.descubra.recife.ui.theme.Poppins
 import com.descubra.recife.ui.theme.SobreLaranja
+import kotlinx.coroutines.launch
 
 
 /** Menu lateral laranja (protótipo, tela 7), aberto ao tocar no avatar. */
@@ -54,6 +57,10 @@ fun MenuLateral(
     onSair: () -> Unit,
     content: @Composable () -> Unit
 ) {
+    // DEF-01: o "voltar" do Android fecha o menu, em vez de sair do app
+    val escopo = rememberCoroutineScope()
+    BackHandler(enabled = drawerState.isOpen) { escopo.launch { drawerState.close() } }
+
     ModalNavigationDrawer(
         drawerState = drawerState,
         drawerContent = {

@@ -22,6 +22,8 @@ interface AuthRepository {
         dataNascimento: String?,
         genero: String?
     ): Result<Unit>
+    /** Login com a conta Google: recebe o ID token obtido pelo Credential Manager. */
+    suspend fun entrarComGoogle(idToken: String): Result<Unit>
     suspend fun clienteAtual(): Cliente?
     suspend fun atualizarPerfil(nome: String, dataNascimento: String?): Result<Unit>
     /** Envia o e-mail de troca de senha do Firebase. */

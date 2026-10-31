@@ -3,6 +3,7 @@ package com.descubra.recife.data.repository
 import com.descubra.recife.data.remote.FirestoreColecoes
 import com.descubra.recife.domain.model.Cliente
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.SetOptions
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -43,6 +44,24 @@ class FirebaseAuthRepository(
                 "genero" to genero
             )
         ).await()
+        Unit
+    }
+
+    override suspend fun entrarComGoogle(idToken: String): Result<Unit> = runCatching {
+        val resultado = auth.signInWithCredential(GoogleAuthProvider.getCredential(idToken, null)).await()
+        val usuario = resultado.user!!
+        // Primeiro acesso com Google: cria o perfil com os dados da conta Google
+        if (resultado.additionalUserInfo?.isNewUser == true || !perfil(usuario.uid).get().await().exists()) {
+            perfil(usuario.uid).set(
+                mapOf(
+                    "nome" to usuario.displayName.orEmpty(),
+                    "email" to usuario.email.orEmpty(),
+                    "dataNascimento" to null,
+                    "genero" to null
+                ),
+                SetOptions.merge()
+            ).await()
+        }
         Unit
     }
 

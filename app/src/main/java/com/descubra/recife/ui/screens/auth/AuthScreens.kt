@@ -63,6 +63,7 @@ import com.descubra.recife.ui.theme.Laranja
 import com.descubra.recife.ui.theme.Pessego
 import com.descubra.recife.ui.theme.PessegoClaro
 import com.descubra.recife.ui.theme.Poppins
+import com.descubra.recife.util.LoginGoogle
 
 private val TextoEscuro = Color(0xFF2B2B2B)
 
@@ -147,9 +148,16 @@ fun LoginScreen(
             Spacer(Modifier.height(44.dp))
             BotaoRetangular("Não tem uma conta? Cadastre-se", Laranja, Color.White, onCadastroClick)
             Spacer(Modifier.height(10.dp))
-            BotaoRetangular("Entrar com a conta Google", CinzaCampo, TextoEscuro, emBreve, icone = {
-                Text("G", fontFamily = Poppins, fontWeight = FontWeight.Bold, fontSize = 20.sp, color = Color(0xFF4285F4))
-            })
+            BotaoRetangular(
+                "Entrar com a conta Google",
+                CinzaCampo,
+                TextoEscuro,
+                onClick = { viewModel.entrarComGoogle { LoginGoogle.obterIdToken(context) } },
+                habilitado = !estado.carregando,
+                icone = {
+                    Text("G", fontFamily = Poppins, fontWeight = FontWeight.Bold, fontSize = 20.sp, color = Color(0xFF4285F4))
+                }
+            )
             if (modoDemo) {
                 Text(
                     "Modo demonstração: Firebase não configurado. Qualquer e-mail e senha com 6+ caracteres entra.",

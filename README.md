@@ -48,6 +48,17 @@ Pelo terminal:
 
 > O `google-services.json` está no `.gitignore`. Cada membro do grupo baixa o seu do console, e ele nunca vai para o repositório.
 
+### Login com Google
+
+1. No Firebase, vá em **Authentication → Método de login → Adicionar novo provedor → Google → Ativar** e escolha o e-mail de suporte.
+2. Em **Configurações do projeto → Seus aplicativos**, adicione a impressão digital **SHA-1** de cada computador que vai rodar o app, nos dois apps (dev e prod). Para descobrir o SHA-1 da sua máquina:
+   ```bash
+   keytool -list -v -keystore ~/.android/debug.keystore -alias androiddebugkey -storepass android | grep SHA1
+   ```
+3. Baixe o `google-services.json` de novo e substitua o que está em `app/`.
+
+O botão "Entrar com a conta Google" usa o Credential Manager do Android. Se o `google-services.json` ainda não tiver o Google ativado, o botão avisa que o login com Google não está configurado, em vez de travar.
+
 ### Cadastrando o catálogo inicial
 
 As regras do Firestore não deixam o app gravar categorias e locais. Por isso, o catálogo inicial (5 categorias e 13 pontos turísticos do Recife, em [`tools/seed/dados.json`](tools/seed/dados.json)) é enviado por um script que usa uma chave de administrador. Para rodar, é preciso ter o Node.js instalado.
@@ -158,6 +169,22 @@ As telas seguem o protótipo do Figma: splash com a máscara, login, cadastro, i
 | Versionamento | SemVer `1.0.0` (`versionName`) e `versionCode` incremental |
 
 Continuam em aberto: a estratégia de backup e o critério de exclusão e retenção de dados.
+
+## Testes (Sprint 3)
+
+O plano foi executado em 31/10/2026, no emulador do Android Studio (Medium Phone, Android 17 / API 37). O registro completo está em [`docs/testes/Planilha_De_Teste_Descubra_Recife.xlsx`](docs/testes/Planilha_De_Teste_Descubra_Recife.xlsx):
+
+- **Atividade I (Matriz de Rastreabilidade):** os 23 casos de teste.
+- **Atividade II (Roteiro de Teste):** passos, resultado esperado, resultado obtido e status de cada caso.
+- **Atividade III (Controle de Execução):** totais por funcionalidade, calculados por fórmula.
+- **Atividade IV (Controle de Defeitos):** DEF-01 e DEF-02 foram encontrados e corrigidos; DEF-03 é estético e ficou aberto.
+- **Evidências:** prints de cada caso. Os mesmos prints estão em [`docs/testes/evidencias/`](docs/testes/evidencias).
+
+Para rodar os testes unitários (JUnit):
+
+```bash
+./gradlew testDevDebugUnitTest
+```
 
 ---
 

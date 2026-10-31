@@ -3,6 +3,7 @@ package com.descubra.recife.ui.screens.auth
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.descubra.recife.data.repository.AuthRepository
+import com.descubra.recife.util.LoginGoogle
 import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException
 import com.google.firebase.auth.FirebaseAuthInvalidUserException
 import com.google.firebase.auth.FirebaseAuthUserCollisionException
@@ -38,6 +39,20 @@ class AuthViewModel(private val auth: AuthRepository) : ViewModel() {
             return
         }
         executar { auth.entrar(email.trim(), senha) }
+    }
+
+    /** O seletor de contas roda na tela (precisa da Activity); aqui só trocamos o token pelo login. */
+    fun entrarComGoogle(obterToken: suspend () -> Result<String>) {
+        viewModelScope.launch {
+            _estado.value = AuthUiState(carregando = true)
+            val token = obterToken()
+            val erro = token.exceptionOrNull()
+            _estado.value = when {
+                erro is LoginGoogle.Cancelado -> AuthUiState()
+                erro != null -> AuthUiState(erro = mensagem(erro))
+                else -> AuthUiState(erro = auth.entrarComGoogle(token.getOrThrow()).exceptionOrNull()?.let(::mensagem))
+            }
+        }
     }
 
     fun cadastrar(form: FormCadastro) {

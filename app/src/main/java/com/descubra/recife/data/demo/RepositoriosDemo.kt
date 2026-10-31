@@ -38,6 +38,9 @@ class AuthRepositoryDemo : AuthRepository {
         return entrar(email, senha)
     }
 
+    override suspend fun entrarComGoogle(idToken: String): Result<Unit> =
+        Result.failure(IllegalStateException("Login com Google exige o Firebase configurado"))
+
     override suspend fun clienteAtual(): Cliente? = cliente
 
     override suspend fun atualizarPerfil(nome: String, dataNascimento: String?): Result<Unit> {
