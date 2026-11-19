@@ -3,6 +3,7 @@ package com.descubra.recife.data.repository
 import com.descubra.recife.data.remote.FirestoreColecoes
 import com.descubra.recife.domain.model.Cliente
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.SetOptions
@@ -74,13 +75,21 @@ class FirebaseAuthRepository(
             email = doc.getString("email") ?: usuario.email.orEmpty(),
             dataNascimento = doc.getString("dataNascimento"),
             telefone = doc.getString("telefone"),
-            genero = doc.getString("genero")
+            genero = doc.getString("genero"),
+            // A foto escolhida no app vale mais; sem ela, usa a da conta Google.
+            foto = doc.getString("foto") ?: fotoDoGoogle(usuario)
         )
     }
 
     override suspend fun atualizarPerfil(nome: String, dataNascimento: String?): Result<Unit> = runCatching {
         val uid = auth.currentUser?.uid ?: error("Faça login novamente")
         perfil(uid).set(mapOf("nome" to nome, "dataNascimento" to dataNascimento), SetOptions.merge()).await()
+        Unit
+    }
+
+    override suspend fun atualizarFoto(jpegBase64: String): Result<Unit> = runCatching {
+        val uid = auth.currentUser?.uid ?: error("Faça login novamente")
+        perfil(uid).set(mapOf("foto" to jpegBase64), SetOptions.merge()).await()
         Unit
     }
 
@@ -91,6 +100,12 @@ class FirebaseAuthRepository(
     }
 
     override fun sair() = auth.signOut()
+
+    /** URL da foto da conta Google, pedindo uma versão maior que a padrão (96 px). */
+    private fun fotoDoGoogle(usuario: FirebaseUser): String? =
+        (usuario.providerData.firstOrNull { it.providerId == GoogleAuthProvider.PROVIDER_ID }?.photoUrl ?: usuario.photoUrl)
+            ?.toString()
+            ?.replace("=s96-c", "=s400-c")
 
     private fun perfil(uid: String) = db.collection(FirestoreColecoes.CLIENTES).document(uid)
 }

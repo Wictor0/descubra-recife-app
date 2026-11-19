@@ -18,6 +18,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.descubra.recife.di.AppContainer
 import com.descubra.recife.domain.model.Cliente
+import com.descubra.recife.ui.components.Aba
 import com.descubra.recife.ui.components.MenuLateral
 import com.descubra.recife.ui.components.TelaComBarra
 import com.descubra.recife.ui.screens.auth.AuthViewModel
@@ -31,6 +32,7 @@ import com.descubra.recife.ui.screens.local.LocalViewModel
 import com.descubra.recife.ui.screens.perfil.PerfilScreen
 import com.descubra.recife.ui.screens.roteiro.RoteiroScreen
 import com.descubra.recife.ui.screens.roteiro.RoteiroViewModel
+import com.descubra.recife.util.FotoPerfil
 import kotlinx.coroutines.launch
 
 object Rotas {
@@ -58,6 +60,12 @@ fun DescubraRecifeNavHost(container: AppContainer, isDarkMode: Boolean) {
         value = if (clienteId == null) null else runCatching { container.authRepository.clienteAtual() }.getOrNull()
     }
     val inicial = cliente?.inicial ?: "?"
+    val foto = remember(cliente?.foto) { FotoPerfil.modelo(cliente?.foto) }
+
+    // Ao entrar na conta (inclusive em outro aparelho), já traz o roteiro salvo na nuvem.
+    LaunchedEffect(clienteId) {
+        if (clienteId != null) container.roteiroDoCliente.sincronizar()
+    }
 
     // Login/logout trocam a pilha inteira de telas.
     LaunchedEffect(clienteId) {
@@ -71,13 +79,14 @@ fun DescubraRecifeNavHost(container: AppContainer, isDarkMode: Boolean) {
 
     // Telas com banner + barra inferior + menu lateral (abre no avatar).
     @Composable
-    fun Principal(conteudo: @Composable (abrirMenu: () -> Unit) -> Unit) {
+    fun Principal(aba: Aba, conteudo: @Composable (abrirMenu: () -> Unit) -> Unit) {
         val drawer = rememberDrawerState(DrawerValue.Closed)
         val escopo = rememberCoroutineScope()
         MenuLateral(
             drawerState = drawer,
             nomeCliente = cliente?.nome?.ifBlank { null } ?: "Visitante",
             inicialCliente = inicial,
+            fotoCliente = foto,
             modoEscuro = isDarkMode,
             onVerPerfil = { escopo.launch { drawer.close() }; nav.navigate(Rotas.PERFIL) },
             onCriar = { escopo.launch { drawer.close() }; abas.roteiro() },
@@ -85,7 +94,7 @@ fun DescubraRecifeNavHost(container: AppContainer, isDarkMode: Boolean) {
             onFaq = { escopo.launch { drawer.close() }; nav.navigate(Rotas.FAQ) },
             onSair = { escopo.launch { drawer.close() }; container.authRepository.sair() }
         ) {
-            TelaComBarra(abas::home, abas::busca, abas::roteiro) {
+            TelaComBarra(abas::home, abas::busca, abas::roteiro, aba) {
                 conteudo { escopo.launch { drawer.open() } }
             }
         }
@@ -107,10 +116,11 @@ fun DescubraRecifeNavHost(container: AppContainer, isDarkMode: Boolean) {
             )
         }
         composable(Rotas.HOME) {
-            Principal { abrirMenu ->
+            Principal(Aba.INICIO) { abrirMenu ->
                 HomeScreen(
                     viewModel = viewModel { HomeViewModel(container.catalogoRepository) },
                     inicialCliente = inicial,
+                    fotoCliente = foto,
                     focarBusca = false,
                     onAvatarClick = abrirMenu,
                     onLocalClick = { nav.navigate(Rotas.local(it)) }
@@ -118,10 +128,11 @@ fun DescubraRecifeNavHost(container: AppContainer, isDarkMode: Boolean) {
             }
         }
         composable(Rotas.BUSCA) {
-            Principal { abrirMenu ->
+            Principal(Aba.BUSCAR) { abrirMenu ->
                 HomeScreen(
                     viewModel = viewModel { HomeViewModel(container.catalogoRepository) },
                     inicialCliente = inicial,
+                    fotoCliente = foto,
                     focarBusca = true,
                     onAvatarClick = abrirMenu,
                     onLocalClick = { nav.navigate(Rotas.local(it)) }
@@ -144,14 +155,14 @@ fun DescubraRecifeNavHost(container: AppContainer, isDarkMode: Boolean) {
             )
         }
         composable(Rotas.ROTEIRO) {
-            Principal { abrirMenu ->
+            Principal(Aba.ROTEIRO) { abrirMenu ->
                 RoteiroScreen(
                     viewModel = viewModel {
                         RoteiroViewModel(container.roteiroDoCliente, container.catalogoRepository, container.avaliacaoRepository)
                     },
                     inicialCliente = inicial,
+                    fotoCliente = foto,
                     onAvatarClick = abrirMenu,
-                    onBuscaClick = abas::busca,
                     onVoltar = abas::home,
                     onAdicionar = abas::home,
                     onLocalClick = { nav.navigate(Rotas.local(it)) }
@@ -181,15 +192,27 @@ fun DescubraRecifeNavHost(container: AppContainer, isDarkMode: Boolean) {
     }
 }
 
-/** Navegação entre as abas da barra, sem empilhar a mesma aba várias vezes. */
+/**
+ * Navegação entre as abas da barra. A pilha fica sempre "Início" ou
+ * "Início > outra aba", então o voltar do Android e o botão Início sempre
+ * levam para a tela inicial, e a mesma aba nunca é empilhada duas vezes.
+ */
 private class Abas(private val nav: NavHostController) {
-    fun home() = ir(Rotas.HOME)
+    fun home() {
+        // Volta até o Início que já está na pilha; se não estiver, recria a pilha nele.
+        if (!nav.popBackStack(Rotas.HOME, inclusive = false)) {
+            nav.navigate(Rotas.HOME) { popUpTo(nav.graph.id) { inclusive = true } }
+        }
+    }
+
     fun busca() = ir(Rotas.BUSCA)
     fun roteiro() = ir(Rotas.ROTEIRO)
 
-    private fun ir(rota: String) = nav.navigate(rota) {
-        popUpTo(Rotas.HOME) { saveState = true }
-        launchSingleTop = true
-        restoreState = true
+    private fun ir(rota: String) {
+        if (nav.currentDestination?.route == rota) return
+        nav.navigate(rota) {
+            popUpTo(Rotas.HOME)
+            launchSingleTop = true
+        }
     }
 }

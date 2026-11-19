@@ -45,6 +45,7 @@ import com.descubra.recife.ui.theme.Poppins
 fun HomeScreen(
     viewModel: HomeViewModel,
     inicialCliente: String,
+    fotoCliente: Any?,
     focarBusca: Boolean,
     onAvatarClick: () -> Unit,
     onLocalClick: (String) -> Unit
@@ -63,6 +64,7 @@ fun HomeScreen(
         CabecalhoBanner(
             inicial = inicialCliente,
             onAvatarClick = onAvatarClick,
+            foto = fotoCliente,
             busca = estado.busca,
             onBuscaChange = viewModel::buscar,
             focusRequester = foco

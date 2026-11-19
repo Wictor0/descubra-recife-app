@@ -53,13 +53,18 @@ import com.descubra.recife.domain.model.Local
 import com.descubra.recife.ui.theme.Laranja
 import com.descubra.recife.ui.theme.Poppins
 import com.descubra.recife.util.Imagens
+import coil.compose.AsyncImage
 
 // Peças visuais repetidas nas telas do protótipo: banner de cerâmica com avatar
 // e busca, folha branca arredondada, cards de destino e círculos de categoria.
 
-/** Círculo com a inicial do Cliente (o protótipo usa foto; a foto de perfil fica para depois). */
+/**
+ * Círculo com a foto de perfil do Cliente. Sem foto (ou enquanto ela carrega),
+ * mostra a inicial do nome. [foto] é o que o Coil sabe carregar: a URL da foto
+ * da conta Google ou os bytes da foto escolhida na galeria.
+ */
 @Composable
-fun AvatarCliente(inicial: String, tamanho: Dp, onClick: (() -> Unit)? = null) {
+fun AvatarCliente(inicial: String, tamanho: Dp, onClick: (() -> Unit)? = null, foto: Any? = null) {
     Box(
         modifier = Modifier
             .size(tamanho)
@@ -76,6 +81,14 @@ fun AvatarCliente(inicial: String, tamanho: Dp, onClick: (() -> Unit)? = null) {
             fontWeight = FontWeight.SemiBold,
             fontSize = (tamanho.value * 0.42f).sp
         )
+        if (foto != null) {
+            AsyncImage(
+                model = foto,
+                contentDescription = "Foto de perfil",
+                contentScale = ContentScale.Crop,
+                modifier = Modifier.fillMaxSize()
+            )
+        }
     }
 }
 
@@ -87,6 +100,7 @@ fun AvatarCliente(inicial: String, tamanho: Dp, onClick: (() -> Unit)? = null) {
 fun CabecalhoBanner(
     inicial: String,
     onAvatarClick: () -> Unit,
+    foto: Any? = null,
     busca: String = "",
     onBuscaChange: (String) -> Unit = {},
     onBuscaClick: (() -> Unit)? = null,
@@ -110,7 +124,7 @@ fun CabecalhoBanner(
                 .padding(start = 16.dp, end = 16.dp, top = 24.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            AvatarCliente(inicial, 62.dp, onAvatarClick)
+            AvatarCliente(inicial, 62.dp, onAvatarClick, foto)
             Spacer(Modifier.width(14.dp))
             Surface(
                 modifier = Modifier
@@ -176,14 +190,31 @@ fun BotaoVoltarCirculo(onClick: () -> Unit, modifier: Modifier = Modifier) {
     }
 }
 
+/**
+ * Foto do local: a que vem dentro do app (funciona offline); se não houver,
+ * a primeira URL do campo "imagens" do Firestore; e, por último, a textura do banner.
+ */
 @Composable
 fun FotoLocal(local: Local, modifier: Modifier = Modifier) {
-    Image(
-        painter = painterResource(Imagens.doLocal(local.id) ?: R.drawable.bg_banner_recife),
-        contentDescription = local.titulo,
-        contentScale = ContentScale.Crop,
-        modifier = modifier
-    )
+    val embutida = Imagens.doLocal(local.id)
+    val url = local.imagens.firstOrNull { it.startsWith("http") }
+    if (embutida == null && url != null) {
+        AsyncImage(
+            model = url,
+            contentDescription = local.titulo,
+            contentScale = ContentScale.Crop,
+            placeholder = painterResource(R.drawable.bg_banner_recife),
+            error = painterResource(R.drawable.bg_banner_recife),
+            modifier = modifier
+        )
+    } else {
+        Image(
+            painter = painterResource(embutida ?: R.drawable.bg_banner_recife),
+            contentDescription = local.titulo,
+            contentScale = ContentScale.Crop,
+            modifier = modifier
+        )
+    }
 }
 
 /** Card de "Destinos populares": foto com degradê e o nome legível por cima. */

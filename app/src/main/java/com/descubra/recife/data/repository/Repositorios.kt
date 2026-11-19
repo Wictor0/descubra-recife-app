@@ -26,6 +26,8 @@ interface AuthRepository {
     suspend fun entrarComGoogle(idToken: String): Result<Unit>
     suspend fun clienteAtual(): Cliente?
     suspend fun atualizarPerfil(nome: String, dataNascimento: String?): Result<Unit>
+    /** Salva a foto de perfil (JPEG pequeno em Base64) no perfil do Cliente. */
+    suspend fun atualizarFoto(jpegBase64: String): Result<Unit>
     /** Envia o e-mail de troca de senha do Firebase. */
     suspend fun redefinirSenha(): Result<Unit>
     fun sair()
@@ -46,13 +48,21 @@ interface RoteiroRepository {
     fun roteiros(clienteId: String): Flow<List<Roteiro>>
     suspend fun salvar(roteiro: Roteiro)
     suspend fun excluir(clienteId: String, roteiroId: String)
-    /** Puxa do Firestore os roteiros feitos em outro aparelho (RA-005). */
-    suspend fun sincronizar(clienteId: String)
+    /**
+     * Sincroniza o aparelho com a nuvem (RA-005): sobe o que foi feito offline
+     * e baixa a versão mais atual. Devolve false se não houve conexão.
+     */
+    suspend fun sincronizar(clienteId: String): Boolean
+    /** Fica escutando a nuvem e aplica no aparelho as mudanças feitas em outro aparelho. */
+    fun acompanhar(clienteId: String): Flow<Unit>
 }
 
 /** Lado remoto dos roteiros. É opcional: no modo demonstração não existe. */
 interface RoteiroRemoto {
     suspend fun salvar(roteiro: Roteiro)
     suspend fun excluir(clienteId: String, roteiroId: String)
+    /** Lê direto do servidor (falha se estiver sem internet). */
     suspend fun listar(clienteId: String): List<Roteiro>
+    /** Emite a lista do servidor a cada mudança (publish/subscribe). */
+    fun observar(clienteId: String): Flow<List<Roteiro>>
 }

@@ -19,6 +19,13 @@ interface RoteiroDao {
     @Query("SELECT * FROM roteiro_locais WHERE roteiroId IN (SELECT id FROM roteiros WHERE clienteId = :clienteId) ORDER BY ordem")
     fun locaisDosRoteiros(clienteId: String): Flow<List<RoteiroLocalEntity>>
 
+    /** Fotografia atual (sem Flow), usada pela sincronização. */
+    @Query("SELECT * FROM roteiros WHERE clienteId = :clienteId")
+    suspend fun roteirosAgora(clienteId: String): List<RoteiroEntity>
+
+    @Query("SELECT * FROM roteiro_locais WHERE roteiroId = :roteiroId ORDER BY ordem")
+    suspend fun locaisAgora(roteiroId: String): List<RoteiroLocalEntity>
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun inserirRoteiro(roteiro: RoteiroEntity)
 

@@ -49,6 +49,7 @@ fun MenuLateral(
     drawerState: DrawerState,
     nomeCliente: String,
     inicialCliente: String,
+    fotoCliente: Any? = null,
     modoEscuro: Boolean,
     onVerPerfil: () -> Unit,
     onCriar: () -> Unit,
@@ -82,7 +83,7 @@ fun MenuLateral(
                             .padding(horizontal = 18.dp, vertical = 20.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        AvatarCliente(inicialCliente, 56.dp)
+                        AvatarCliente(inicialCliente, 56.dp, foto = fotoCliente)
                         Spacer(Modifier.width(14.dp))
                         Column {
                             Text(nomeCliente, fontFamily = Poppins, fontSize = 20.sp, color = SobreLaranja)

@@ -25,6 +25,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -55,8 +56,8 @@ import com.descubra.recife.util.Mapas
 fun RoteiroScreen(
     viewModel: RoteiroViewModel,
     inicialCliente: String,
+    fotoCliente: Any?,
     onAvatarClick: () -> Unit,
-    onBuscaClick: () -> Unit,
     onVoltar: () -> Unit,
     onAdicionar: () -> Unit,
     onLocalClick: (String) -> Unit
@@ -64,12 +65,32 @@ fun RoteiroScreen(
     val estado by viewModel.estado.collectAsStateWithLifecycle()
     val context = LocalContext.current
 
+    // Toda vez que a aba aparece: puxa a versão mais atual da nuvem e fica
+    // escutando mudanças enquanto ela estiver na tela.
+    LaunchedEffect(Unit) {
+        viewModel.aoAbrir()
+        viewModel.acompanhar()
+    }
+
     Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState())) {
-        CabecalhoBanner(inicial = inicialCliente, onAvatarClick = onAvatarClick, onBuscaClick = onBuscaClick)
+        // A busca daqui procura nos locais do roteiro.
+        CabecalhoBanner(
+            inicial = inicialCliente,
+            onAvatarClick = onAvatarClick,
+            foto = fotoCliente,
+            busca = estado.busca,
+            onBuscaChange = viewModel::buscar
+        )
         FolhaConteudo {
             BotaoVoltarCirculo(onVoltar, Modifier.padding(start = 16.dp))
             Column(Modifier.padding(horizontal = 36.dp)) {
                 Text("Seu Roteiro", fontFamily = Poppins, fontSize = 22.sp, color = MaterialTheme.colorScheme.onSurface)
+                Text(
+                    estado.textoVersao(),
+                    fontFamily = Poppins,
+                    fontSize = 12.sp,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
                 if (estado.vazio) {
                     Text(
                         "Conheça os lugares mais incríveis de Recife e Região.",
@@ -109,7 +130,7 @@ fun RoteiroScreen(
 
             if (estado.itens.isEmpty()) {
                 Text(
-                    "Nenhum local do roteiro nessa categoria.",
+                    if (estado.busca.isNotBlank()) "Nenhum local do roteiro com esse nome." else "Nenhum local do roteiro nessa categoria.",
                     fontFamily = Poppins,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.padding(horizontal = 36.dp)

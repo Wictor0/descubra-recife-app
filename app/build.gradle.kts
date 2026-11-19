@@ -56,6 +56,11 @@ android {
     kotlinOptions {
         jvmTarget = "17"
     }
+    // Nos testes unitários (JVM), android.util.Log não quebra: só não imprime nada.
+    testOptions {
+        unitTests.isReturnDefaultValues = true
+    }
+
     buildFeatures {
         compose = true
         buildConfig = true
@@ -93,6 +98,7 @@ dependencies {
     implementation(libs.androidx.credentials)
     implementation(libs.androidx.credentials.play.services)
     implementation(libs.googleid)
+    implementation(libs.coil.compose)
     implementation(libs.kotlinx.coroutines.play.services)
 
     testImplementation(libs.junit)

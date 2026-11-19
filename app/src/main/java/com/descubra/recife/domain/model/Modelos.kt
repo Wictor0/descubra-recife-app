@@ -9,7 +9,9 @@ data class Cliente(
     val email: String,
     val dataNascimento: String? = null,
     val telefone: String? = null,
-    val genero: String? = null
+    val genero: String? = null,
+    /** Foto de perfil: URL (foto da conta Google) ou JPEG em Base64 (escolhida no app). */
+    val foto: String? = null
 ) {
     val primeiroNome: String get() = nome.trim().substringBefore(' ').ifBlank { "Visitante" }
     val inicial: String get() = primeiroNome.take(1).uppercase()

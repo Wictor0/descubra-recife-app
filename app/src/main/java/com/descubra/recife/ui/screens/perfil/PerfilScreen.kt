@@ -1,6 +1,15 @@
 package com.descubra.recife.ui.screens.perfil
 
 import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.PickVisualMediaRequest
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.ui.text.input.VisualTransformation
+import com.descubra.recife.util.DataNascimento
+import com.descubra.recife.util.FotoPerfil
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -64,15 +73,32 @@ fun PerfilScreen(auth: AuthRepository, onVoltar: () -> Unit, onPerfilAtualizado:
     val escopo = rememberCoroutineScope()
     var cliente by remember { mutableStateOf<Cliente?>(null) }
     var nome by remember { mutableStateOf("") }
+    /** Só os números da data; as barras aparecem pela máscara. */
     var nascimento by remember { mutableStateOf("") }
+    var foto by remember { mutableStateOf<String?>(null) }
     var salvando by remember { mutableStateOf(false) }
+    var enviandoFoto by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
         cliente = runCatching { auth.clienteAtual() }.getOrNull()
         nome = cliente?.nome.orEmpty()
-        nascimento = cliente?.dataNascimento.orEmpty()
+        nascimento = DataNascimento.digitos(cliente?.dataNascimento.orEmpty())
+        foto = cliente?.foto
     }
     fun aviso(texto: String) = Toast.makeText(context, texto, Toast.LENGTH_LONG).show()
+
+    // Seletor de fotos do Android: não pede permissão de acesso à galeria inteira.
+    val escolherFoto = rememberLauncherForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
+        if (uri == null) return@rememberLauncherForActivityResult
+        enviandoFoto = true
+        escopo.launch {
+            runCatching { withContext(Dispatchers.Default) { FotoPerfil.prepararDaGaleria(context, uri) } }
+                .mapCatching { base64 -> auth.atualizarFoto(base64).getOrThrow(); base64 }
+                .onSuccess { foto = it; aviso("Foto atualizada!"); onPerfilAtualizado() }
+                .onFailure { aviso("Não foi possível trocar a foto. Verifique a internet e tente de novo.") }
+            enviandoFoto = false
+        }
+    }
 
     Column(
         modifier = Modifier
@@ -101,14 +127,17 @@ fun PerfilScreen(auth: AuthRepository, onVoltar: () -> Unit, onPerfilAtualizado:
         }
         Spacer(Modifier.height(36.dp))
         Box(Modifier.align(Alignment.CenterHorizontally)) {
-            AvatarCliente(Cliente("", nome, "").inicial, 136.dp)
+            AvatarCliente(Cliente("", nome, "").inicial, 136.dp, foto = FotoPerfil.modelo(foto))
+            if (enviandoFoto) CircularProgressIndicator(Modifier.align(Alignment.Center), color = Coral)
             Box(
                 Modifier
                     .align(Alignment.BottomEnd)
                     .offset(x = 4.dp, y = 4.dp)
                     .size(46.dp)
                     .background(Coral, CircleShape)
-                    .clickable { aviso("Foto de perfil: em breve!") },
+                    .clickable(enabled = !enviandoFoto) {
+                        escolherFoto.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
+                    },
                 contentAlignment = Alignment.Center
             ) {
                 Icon(Icons.Filled.Edit, contentDescription = "Trocar foto", tint = Color.White, modifier = Modifier.size(22.dp))
@@ -121,7 +150,13 @@ fun PerfilScreen(auth: AuthRepository, onVoltar: () -> Unit, onPerfilAtualizado:
             Text(cliente?.email.orEmpty(), fontFamily = Poppins, fontSize = 16.sp, color = MaterialTheme.colorScheme.onSurface)
         }
         Linha(Icons.Outlined.CalendarMonth) {
-            CampoLinha(nascimento, { nascimento = it.filter { c -> c.isDigit() || c == '/' }.take(10) }, "Data de nascimento (dd/mm/aaaa)", KeyboardType.Number)
+            CampoLinha(
+                nascimento,
+                { nascimento = DataNascimento.digitos(it) },
+                "Data de nascimento (dd/mm/aaaa)",
+                KeyboardType.Number,
+                DataNascimento.mascara
+            )
         }
         Linha(Icons.Outlined.VisibilityOff, onClick = {
             escopo.launch {
@@ -140,9 +175,14 @@ fun PerfilScreen(auth: AuthRepository, onVoltar: () -> Unit, onPerfilAtualizado:
             habilitado = !salvando && nome.isNotBlank(),
             modifier = Modifier.fillMaxWidth().height(64.dp),
             onClick = {
+                val data = DataNascimento.valida(nascimento)
+                if (nascimento.isNotEmpty() && data == null) {
+                    aviso("Data de nascimento inválida. Use dd/mm/aaaa.")
+                    return@BotaoPilula
+                }
                 salvando = true
                 escopo.launch {
-                    auth.atualizarPerfil(nome.trim(), nascimento.ifBlank { null })
+                    auth.atualizarPerfil(nome.trim(), data)
                         .onSuccess { aviso("Perfil atualizado!"); onPerfilAtualizado() }
                         .onFailure { aviso(it.message ?: "Não foi possível salvar") }
                     salvando = false
@@ -169,7 +209,13 @@ private fun Linha(icone: ImageVector, onClick: (() -> Unit)? = null, conteudo: @
 }
 
 @Composable
-private fun CampoLinha(valor: String, onChange: (String) -> Unit, dica: String, teclado: KeyboardType = KeyboardType.Text) {
+private fun CampoLinha(
+    valor: String,
+    onChange: (String) -> Unit,
+    dica: String,
+    teclado: KeyboardType = KeyboardType.Text,
+    mascara: VisualTransformation = VisualTransformation.None
+) {
     Box {
         if (valor.isEmpty()) Text(dica, fontFamily = Poppins, fontSize = 16.sp, color = Color(0xFFB0B0B0))
         BasicTextField(
@@ -177,6 +223,7 @@ private fun CampoLinha(valor: String, onChange: (String) -> Unit, dica: String, 
             onValueChange = onChange,
             singleLine = true,
             keyboardOptions = KeyboardOptions(keyboardType = teclado),
+            visualTransformation = mascara,
             textStyle = TextStyle(fontFamily = Poppins, fontSize = 16.sp, color = MaterialTheme.colorScheme.onSurface),
             modifier = Modifier.fillMaxWidth()
         )

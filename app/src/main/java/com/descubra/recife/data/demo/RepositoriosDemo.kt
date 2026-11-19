@@ -48,6 +48,11 @@ class AuthRepositoryDemo : AuthRepository {
         return Result.success(Unit)
     }
 
+    override suspend fun atualizarFoto(jpegBase64: String): Result<Unit> {
+        cliente = cliente?.copy(foto = jpegBase64)
+        return Result.success(Unit)
+    }
+
     override suspend fun redefinirSenha(): Result<Unit> = Result.success(Unit)
 
     override fun sair() {

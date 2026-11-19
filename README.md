@@ -174,10 +174,10 @@ Continuam em aberto: a estratégia de backup e o critério de exclusão e reten�
 
 O plano foi executado em 31/10/2026, no emulador do Android Studio (Medium Phone, Android 17 / API 37). O registro completo está em [`docs/testes/Planilha_De_Teste_Descubra_Recife.xlsx`](docs/testes/Planilha_De_Teste_Descubra_Recife.xlsx):
 
-- **Atividade I (Matriz de Rastreabilidade):** os 23 casos de teste.
+- **Atividade I (Matriz de Rastreabilidade):** os 24 casos de teste (incluindo o login com Google).
 - **Atividade II (Roteiro de Teste):** passos, resultado esperado, resultado obtido e status de cada caso.
 - **Atividade III (Controle de Execução):** totais por funcionalidade, calculados por fórmula.
-- **Atividade IV (Controle de Defeitos):** DEF-01 e DEF-02 foram encontrados e corrigidos; DEF-03 é estético e ficou aberto.
+- **Atividade IV (Controle de Defeitos):** DEF-01, DEF-02 e DEF-04 foram encontrados e corrigidos; DEF-03 é estético e ficou aberto.
 - **Evidências:** prints de cada caso. Os mesmos prints estão em [`docs/testes/evidencias/`](docs/testes/evidencias).
 
 Para rodar os testes unitários (JUnit):
@@ -186,14 +186,35 @@ Para rodar os testes unitários (JUnit):
 ./gradlew testDevDebugUnitTest
 ```
 
+No Android Studio: botão direito na pasta `app/src/test/java/com/descubra/recife` → **Run 'Tests in ...'**.
+
+| Arquivo | O que testa | Testes |
+|---|---|---|
+| `SincronizacaoTest` | Regra de sincronização do roteiro entre aparelho e nuvem (a última alteração vence) | 6 |
+| `RoteiroRepositoryTest` | Roteiro com banco e nuvem falsos: sem internet, outro aparelho, versão mais nova | 3 |
+| `TelasTest` | ViewModel da tela inicial (carregar, filtrar, buscar, erro sem internet) e filtros do roteiro | 5 |
+| `DataNascimentoTest` | Máscara dd/mm/aaaa e validação de datas | 4 |
+| `RegrasTest` | Regras do roteiro, avaliação, busca e cadastro | 6 |
+| `MapasTest` | Link do "Como chegar" | 1 |
+
+## Sistemas distribuídos no app
+
+O app trabalha com três formas de sistemas distribuídos:
+
+1. **Replicação com consistência eventual (offline-first).** O roteiro existe em duas réplicas: o Room, no aparelho, e o Firestore, na nuvem. A tela sempre lê do aparelho, então funciona sem internet. Com conexão, toda vez que a aba Roteiro é aberta, o app busca a versão do servidor (`Source.SERVER`), sobe o que foi feito offline e baixa a versão mais nova. Conflitos são resolvidos por **last-write-wins**: vence a alteração com o horário mais recente. Código: `data/repository/Sincronizacao.kt` e `RoteiroRepositoryImpl.kt`. Testes: `SincronizacaoTest` e `RoteiroRepositoryTest`.
+2. **Publish/subscribe em tempo real.** Enquanto a aba Roteiro está aberta, o app fica inscrito na coleção `clientes/{uid}/roteiros` (`addSnapshotListener`). Se o roteiro muda em outro aparelho, o Firestore avisa e a tela atualiza sozinha. Código: `FirestoreRoteiroRemoto.observar`.
+3. **Autenticação federada.** No login com Google, o Google emite um token (OpenID Connect) que o Firebase Authentication valida em outro servidor. O perfil e a foto ficam no Firestore e acompanham a conta em qualquer aparelho.
+
+Na prática: se o Cliente entra na conta em outro celular, perde o aparelho ou limpa o cache do app, o roteiro continua salvo na conta e volta na próxima vez que ele abrir a aba com internet. Embaixo de "Seu Roteiro", a tela mostra a data e a hora da versão que está aparecendo ("Atualizado em 19/11/2026 às 11:40" ou, sem internet, "Sem internet · versão de 19/11/2026 às 11:40").
+
 ---
 
 ## 3. Próximos passos
 
 - [x] Criar o projeto no Firebase (`descubra-recife`, apps dev e prod)
 - [ ] Rodar o script de cadastro do catálogo e revisar as coordenadas
-- [ ] Foto de perfil do cliente (hoje o avatar mostra a inicial do nome)
+- [x] Foto de perfil do cliente (foto da conta Google ou escolhida na galeria, guardada no perfil)
 - [x] Aplicar o visual do protótipo nas telas
 - [ ] Trocar as fotos recortadas do protótipo por fotos em boa resolução
-- [ ] Exibir fotos dos locais (carregar `imagens` com Coil)
+- [x] Exibir fotos dos locais (fotos embutidas; locais novos usam a URL do campo `imagens`, carregada com Coil). Créditos em [`docs/creditos_imagens.md`](docs/creditos_imagens.md)
 - [ ] Ajustar a FAQ: ela cita exportação em PDF, que no documento é evolução futura (seção 24)

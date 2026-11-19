@@ -7,16 +7,30 @@ import com.descubra.recife.data.local.RoteiroLocalEntity
 import com.descubra.recife.domain.model.Local
 import com.descubra.recife.domain.model.Roteiro
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.emptyFlow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
+import kotlinx.coroutines.withTimeout
+import kotlinx.coroutines.withTimeoutOrNull
 
 /**
- * Room é a fonte da verdade para a tela (funciona offline, RA-004);
- * o Firestore é espelho para sincronizar entre aparelhos (RA-005, ADR-003).
+ * Duas réplicas do roteiro (RA-004, RA-005, ADR-003):
+ * - Room, no aparelho: é o que a tela mostra, então funciona sem internet;
+ * - Firestore, na nuvem: guarda o roteiro na conta, para outro aparelho ou
+ *   se o app for reinstalado/perder o cache.
+ * Com internet, a nuvem é consultada sempre que o roteiro é aberto e fica
+ * sendo escutada enquanto ele está na tela. Ver [Sincronizacao].
  */
 class RoteiroRepositoryImpl(
     private val dao: RoteiroDao,
     private val remoto: RoteiroRemoto?
 ) : RoteiroRepository {
+
+    /** Evita duas sincronizações ao mesmo tempo (abrir a aba + listener). */
+    private val trava = Mutex()
 
     override fun roteiros(clienteId: String): Flow<List<Roteiro>> =
         combine(dao.roteirosDoCliente(clienteId), dao.locaisDosRoteiros(clienteId)) { roteiros, locais ->
@@ -32,15 +46,12 @@ class RoteiroRepositoryImpl(
         }
 
     override suspend fun salvar(roteiro: Roteiro) {
+        // 1) Grava no aparelho na hora (a tela atualiza mesmo offline)
         salvarLocalmente(roteiro, sincronizado = false)
+        // 2) Tenta subir para a nuvem; sem internet fica "pendente" e sobe na
+        //    próxima sincronização.
         if (remoto == null) return
-        try {
-            remoto.salvar(roteiro)
-            dao.marcarSincronizado(roteiro.id)
-        } catch (e: Exception) {
-            // Sem rede: fica salvo no aparelho e sobe na próxima sincronização.
-            Log.w(TAG, "Roteiro ${roteiro.id} salvo só localmente", e)
-        }
+        subir(roteiro)
     }
 
     override suspend fun excluir(clienteId: String, roteiroId: String) {
@@ -52,13 +63,59 @@ class RoteiroRepositoryImpl(
         }
     }
 
-    override suspend fun sincronizar(clienteId: String) {
-        if (remoto == null) return
-        try {
-            remoto.listar(clienteId).forEach { salvarLocalmente(it, sincronizado = true) }
+    override suspend fun sincronizar(clienteId: String): Boolean {
+        if (remoto == null) return false
+        val daNuvem = try {
+            // Sem internet o Firestore pode ficar tentando por muito tempo: depois
+            // de alguns segundos o app desiste e mostra a cópia do aparelho.
+            withTimeout(ESPERA_SERVIDOR_MS) { remoto.listar(clienteId) }
         } catch (e: Exception) {
-            Log.w(TAG, "Sincronização de roteiros falhou", e)
+            Log.i(TAG, "Sem conexão: mostrando o roteiro salvo no aparelho", e)
+            return false
         }
+        aplicar(clienteId, daNuvem)
+        return true
+    }
+
+    override fun acompanhar(clienteId: String): Flow<Unit> {
+        if (remoto == null) return emptyFlow()
+        return remoto.observar(clienteId)
+            .map { daNuvem -> aplicar(clienteId, daNuvem) }
+            .catch { e -> Log.w(TAG, "Escuta do roteiro na nuvem parou", e) }
+    }
+
+    /** Junta a réplica da nuvem com a do aparelho seguindo o plano de [Sincronizacao]. */
+    private suspend fun aplicar(clienteId: String, daNuvem: List<Roteiro>) = trava.withLock {
+        val noAparelho = dao.roteirosAgora(clienteId)
+        val plano = Sincronizacao.planejar(
+            locais = noAparelho.map { Sincronizacao.Versao(it.id, it.dataGeracao, pendente = !it.sincronizado) },
+            remotos = daNuvem.map { Sincronizacao.Versao(it.id, it.dataGeracao) }
+        )
+        val nuvemPorId = daNuvem.associateBy { it.id }
+        plano.baixar.forEach { id -> salvarLocalmente(nuvemPorId.getValue(id), sincronizado = true) }
+        plano.apagarLocal.forEach { id -> dao.apagarRoteiro(id) }
+        noAparelho.filter { it.id in plano.subir }.forEach { entidade ->
+            subir(
+                Roteiro(
+                    id = entidade.id,
+                    clienteId = entidade.clienteId,
+                    dataGeracao = entidade.dataGeracao,
+                    locais = dao.locaisAgora(entidade.id).map { it.paraLocal() }
+                )
+            )
+        }
+    }
+
+    private suspend fun subir(roteiro: Roteiro) {
+        // Offline, o Firestore guarda a escrita numa fila e só termina quando a
+        // conexão volta; o tempo limite evita deixar a tela esperando.
+        val enviado = try {
+            withTimeoutOrNull(ESPERA_ENVIO_MS) { remoto!!.salvar(roteiro) } != null
+        } catch (e: Exception) {
+            Log.w(TAG, "Roteiro ${roteiro.id} ficou só no aparelho", e)
+            false
+        }
+        if (enviado) dao.marcarSincronizado(roteiro.id)
     }
 
     private suspend fun salvarLocalmente(roteiro: Roteiro, sincronizado: Boolean) {
@@ -92,5 +149,7 @@ class RoteiroRepositoryImpl(
 
     private companion object {
         const val TAG = "RoteiroRepository"
+        const val ESPERA_ENVIO_MS = 8_000L
+        const val ESPERA_SERVIDOR_MS = 8_000L
     }
 }
