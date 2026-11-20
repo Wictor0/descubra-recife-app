@@ -36,6 +36,17 @@ data class FiltrosRoteiro(val categoria: String? = null, val alfabetica: Boolean
     }
 }
 
+/** Uma linha do modal "Adicionar locais". */
+data class OpcaoAdicionar(val local: Local, val noRoteiro: Boolean)
+
+/** Lista do modal: todo o catálogo, com a busca aplicada e marcando o que já está no roteiro. */
+object OpcoesAdicionar {
+    fun listar(catalogo: List<Local>, idsNoRoteiro: Set<String>, busca: String): List<OpcaoAdicionar> =
+        catalogo
+            .filter { busca.isBlank() || HomeUiState.combina(it, busca) || HomeUiState.contemTexto(it.bairro, busca) }
+            .map { OpcaoAdicionar(it, it.id in idsNoRoteiro) }
+}
+
 data class RoteiroUiState(
     val itens: List<ItemRoteiro> = emptyList(),
     val categorias: List<Categoria> = emptyList(),
@@ -43,9 +54,14 @@ data class RoteiroUiState(
     val alfabetica: Boolean = false,
     val busca: String = "",
     val vazio: Boolean = true,
+    /** Quantos locais o roteiro tem (sem filtro nem busca). */
+    val totalNoRoteiro: Int = 0,
     val sincronia: Sincronia = Sincronia.SINCRONIZANDO,
     /** Horário da última alteração do roteiro (em qualquer aparelho). */
-    val alteradoEm: Long? = null
+    val alteradoEm: Long? = null,
+    /** Locais do catálogo para o modal "Adicionar locais". */
+    val opcoes: List<OpcaoAdicionar> = emptyList(),
+    val buscaModal: String = ""
 ) {
     /** Linha embaixo de "Seu Roteiro": de quando é a versão que está na tela. */
     fun textoVersao(fuso: TimeZone = TimeZone.getDefault()): String {
@@ -68,16 +84,18 @@ class RoteiroViewModel(
 ) : ViewModel() {
 
     private val categorias = MutableStateFlow<List<Categoria>>(emptyList())
-    /** id do local -> categorias dele (a cópia do Room não guarda isso). */
-    private val categoriasDoLocal = MutableStateFlow<Map<String, List<String>>>(emptyMap())
     private val contagem = MutableStateFlow<Map<String, Int>>(emptyMap())
     private val filtros = MutableStateFlow(FiltrosRoteiro())
     private val sincronia = MutableStateFlow(Sincronia.SINCRONIZANDO)
+    private val todosOsLocais = MutableStateFlow<List<Local>>(emptyList())
+    private val buscaModal = MutableStateFlow("")
+    private val modal = combine(todosOsLocais, buscaModal) { locais, busca -> locais to busca }
 
     val estado: StateFlow<RoteiroUiState> = combine(
-        roteiro.atual, categorias, categoriasDoLocal, contagem, combine(filtros, sincronia) { f, s -> f to s }
-    ) { atual, cats, porLocal, cont, (f, sinc) ->
+        roteiro.atual, categorias, contagem, combine(filtros, sincronia) { f, s -> f to s }, modal
+    ) { atual, cats, cont, (f, sinc), (catalogo, buscaNoModal) ->
         val locais = atual?.locais.orEmpty()
+        val porLocal = catalogo.associate { it.id to it.categoriaIds }
         RoteiroUiState(
             itens = f.aplicar(locais, porLocal).map { ItemRoteiro(it, cont[it.id]) },
             categorias = cats,
@@ -85,8 +103,11 @@ class RoteiroViewModel(
             alfabetica = f.alfabetica,
             busca = f.busca,
             vazio = locais.isEmpty(),
+            totalNoRoteiro = locais.size,
             sincronia = sinc,
-            alteradoEm = atual?.dataGeracao
+            alteradoEm = atual?.dataGeracao,
+            opcoes = OpcoesAdicionar.listar(catalogo, locais.map { it.id }.toSet(), buscaNoModal),
+            buscaModal = buscaNoModal
         )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), RoteiroUiState())
 
@@ -94,7 +115,7 @@ class RoteiroViewModel(
         viewModelScope.launch {
             runCatching {
                 categorias.value = catalogo.categorias()
-                categoriasDoLocal.value = catalogo.locais().associate { it.id to it.categoriaIds }
+                todosOsLocais.value = catalogo.locais()
             }
         }
         viewModelScope.launch {
@@ -125,4 +146,15 @@ class RoteiroViewModel(
     fun alternarOrdem() = filtros.update { it.copy(alfabetica = !it.alfabetica) }
 
     fun buscar(termo: String) = filtros.update { it.copy(busca = termo) }
+
+    fun buscarNoModal(termo: String) {
+        buscaModal.value = termo
+    }
+
+    /** "+" do modal: põe o local no roteiro; tocar de novo (✓) tira. */
+    fun alternarNoRoteiro(opcao: OpcaoAdicionar) {
+        viewModelScope.launch {
+            if (opcao.noRoteiro) roteiro.remover(opcao.local.id) else roteiro.adicionar(opcao.local)
+        }
+    }
 }

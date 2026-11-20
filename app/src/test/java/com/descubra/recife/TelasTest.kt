@@ -5,7 +5,9 @@ import com.descubra.recife.data.repository.CatalogoRepository
 import com.descubra.recife.domain.model.Categoria
 import com.descubra.recife.domain.model.Local
 import com.descubra.recife.ui.screens.home.HomeViewModel
+import com.descubra.recife.ui.screens.faq.FaqConteudo
 import com.descubra.recife.ui.screens.roteiro.FiltrosRoteiro
+import com.descubra.recife.ui.screens.roteiro.OpcoesAdicionar
 import com.descubra.recife.ui.screens.roteiro.RoteiroUiState
 import com.descubra.recife.ui.screens.roteiro.Sincronia
 import java.util.TimeZone
@@ -94,5 +96,26 @@ class TelasTest {
         val offline = online.copy(sincronia = Sincronia.SO_NO_APARELHO)
         assertEquals("Sem internet · versão de 19/11/2026 às 11:30", offline.textoVersao(recife))
         assertEquals("Sincronizando com a nuvem...", online.copy(sincronia = Sincronia.SINCRONIZANDO).textoVersao(recife))
+    }
+
+    @Test
+    fun `modal de adicionar mostra o catalogo e marca o que ja esta no roteiro`() {
+        val opcoes = OpcoesAdicionar.listar(DadosDemo.locais, setOf("marco-zero"), busca = "")
+        assertEquals(DadosDemo.locais.size, opcoes.size)
+        assertTrue(opcoes.single { it.local.id == "marco-zero" }.noRoteiro)
+        assertEquals(1, opcoes.count { it.noRoteiro })
+    }
+
+    @Test
+    fun `busca do modal filtra por nome sem acento`() {
+        val opcoes = OpcoesAdicionar.listar(DadosDemo.locais, emptySet(), busca = "paco")
+        assertEquals(listOf("paco-do-frevo"), opcoes.map { it.local.id })
+    }
+
+    @Test
+    fun `busca da FAQ acha a pergunta pelo assunto`() {
+        assertEquals(FaqConteudo.perguntas.size, FaqConteudo.buscar("").size)
+        assertEquals(listOf("02"), FaqConteudo.buscar("INTERNET").map { it.number })
+        assertTrue(FaqConteudo.buscar("xyz-nada").isEmpty())
     }
 }

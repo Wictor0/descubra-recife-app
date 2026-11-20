@@ -38,10 +38,11 @@ data class HomeUiState(
 
     companion object {
         /** Busca sem diferenciar maiúsculas nem acentos ("paco" acha "Paço"). */
-        fun combina(local: Local, termo: String): Boolean {
-            val t = normalizar(termo)
-            return normalizar(local.titulo).contains(t) || normalizar(local.endereco).contains(t)
-        }
+        fun combina(local: Local, termo: String): Boolean =
+            contemTexto(local.titulo, termo) || contemTexto(local.endereco, termo)
+
+        /** [texto] contém [termo], ignorando acentos e maiúsculas. */
+        fun contemTexto(texto: String, termo: String): Boolean = normalizar(texto).contains(normalizar(termo))
 
         private fun normalizar(s: String) =
             Normalizer.normalize(s, Normalizer.Form.NFD).replace(Regex("\\p{M}"), "").lowercase().trim()

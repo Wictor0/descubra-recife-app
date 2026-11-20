@@ -104,7 +104,8 @@ fun CabecalhoBanner(
     busca: String = "",
     onBuscaChange: (String) -> Unit = {},
     onBuscaClick: (() -> Unit)? = null,
-    focusRequester: FocusRequester? = null
+    focusRequester: FocusRequester? = null,
+    mostrarAvatar: Boolean = true
 ) {
     Box(
         modifier = Modifier
@@ -124,8 +125,10 @@ fun CabecalhoBanner(
                 .padding(start = 16.dp, end = 16.dp, top = 24.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            AvatarCliente(inicial, 62.dp, onAvatarClick, foto)
-            Spacer(Modifier.width(14.dp))
+            if (mostrarAvatar) {
+                AvatarCliente(inicial, 62.dp, onAvatarClick, foto)
+                Spacer(Modifier.width(14.dp))
+            }
             Surface(
                 modifier = Modifier
                     .weight(1f)

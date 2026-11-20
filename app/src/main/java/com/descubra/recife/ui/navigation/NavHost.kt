@@ -164,7 +164,6 @@ fun DescubraRecifeNavHost(container: AppContainer, isDarkMode: Boolean) {
                     fotoCliente = foto,
                     onAvatarClick = abrirMenu,
                     onVoltar = abas::home,
-                    onAdicionar = abas::home,
                     onLocalClick = { nav.navigate(Rotas.local(it)) }
                 )
             }
@@ -177,17 +176,16 @@ fun DescubraRecifeNavHost(container: AppContainer, isDarkMode: Boolean) {
             )
         }
         composable(Rotas.FAQ) {
-            // Sem login (veio de "Precisar de ajuda?"), a barra só volta para o login.
             val voltar = { nav.popBackStack(); Unit }
-            val logado = clienteId != null
-            FaqScreen(
-                isDarkMode = isDarkMode,
-                onHomeClick = if (logado) abas::home else voltar,
-                onSearchClick = if (logado) abas::busca else voltar,
-                onItineraryClick = if (logado) abas::roteiro else voltar,
-                onProfileClick = { if (logado) nav.navigate(Rotas.PERFIL) else voltar() },
-                onBackClick = voltar
-            )
+            if (clienteId != null) {
+                // Logado: igual às outras telas (foto, menu lateral e barra de abas).
+                Principal(Aba.NENHUMA) { abrirMenu ->
+                    FaqScreen(inicial, foto, onAvatarClick = abrirMenu, onVoltar = voltar)
+                }
+            } else {
+                // Veio do "Precisar de ajuda?" do login: sem conta, sem avatar nem abas.
+                FaqScreen(inicial, null, onAvatarClick = null, onVoltar = voltar)
+            }
         }
     }
 }

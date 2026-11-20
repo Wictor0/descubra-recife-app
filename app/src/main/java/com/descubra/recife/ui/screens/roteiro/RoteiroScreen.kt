@@ -1,6 +1,21 @@
 package com.descubra.recife.ui.screens.roteiro
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
+import androidx.compose.material3.rememberModalBottomSheetState
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -59,11 +74,22 @@ fun RoteiroScreen(
     fotoCliente: Any?,
     onAvatarClick: () -> Unit,
     onVoltar: () -> Unit,
-    onAdicionar: () -> Unit,
     onLocalClick: (String) -> Unit
 ) {
     val estado by viewModel.estado.collectAsStateWithLifecycle()
     val context = LocalContext.current
+    var modalAberto by rememberSaveable { mutableStateOf(false) }
+
+    if (modalAberto) {
+        ModalAdicionarLocais(
+            opcoes = estado.opcoes,
+            totalNoRoteiro = estado.totalNoRoteiro,
+            busca = estado.buscaModal,
+            onBusca = viewModel::buscarNoModal,
+            onAlternar = viewModel::alternarNoRoteiro,
+            onFechar = { modalAberto = false; viewModel.buscarNoModal("") }
+        )
+    }
 
     // Toda vez que a aba aparece: puxa a versão mais atual da nuvem e fica
     // escutando mudanças enquanto ela estiver na tela.
@@ -109,12 +135,12 @@ fun RoteiroScreen(
                 ) {
                     Text("Você ainda não tem um roteiro", fontFamily = Poppins, fontSize = 15.sp, color = MaterialTheme.colorScheme.onSurface)
                     Text("Que tal começarmos essa jornada juntos?", fontFamily = Poppins, fontSize = 15.sp, color = MaterialTheme.colorScheme.onSurface)
-                    BotaoPilula("Adicione", onAdicionar, Modifier.width(150.dp).padding(top = 6.dp), fontSize = 18)
+                    BotaoPilula("Adicione", { modalAberto = true }, Modifier.width(150.dp).padding(top = 6.dp), fontSize = 18)
                 }
                 return@FolhaConteudo
             }
 
-            Row(Modifier.padding(start = 34.dp, top = 12.dp, bottom = 20.dp), horizontalArrangement = Arrangement.spacedBy(14.dp)) {
+            Row(Modifier.padding(start = 28.dp, end = 16.dp, top = 12.dp, bottom = 20.dp), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                 var abrirFiltro by remember { mutableStateOf(false) }
                 Box {
                     PilulaAcao(Icons.Filled.FilterAlt, estado.categorias.find { it.id == estado.filtro }?.nome ?: "Filtros") { abrirFiltro = true }
@@ -126,6 +152,7 @@ fun RoteiroScreen(
                     }
                 }
                 PilulaAcao(Icons.AutoMirrored.Filled.Sort, if (estado.alfabetica) "A-Z" else "Ordem", viewModel::alternarOrdem)
+                PilulaAcao(Icons.Filled.Add, "Adicionar") { modalAberto = true }
             }
 
             if (estado.itens.isEmpty()) {
@@ -202,6 +229,102 @@ private fun PilulaAcao(icone: ImageVector, texto: String, onClick: () -> Unit) {
             Icon(icone, contentDescription = null, tint = SobreLaranja, modifier = Modifier.size(20.dp))
             Spacer(Modifier.width(6.dp))
             Text(texto, fontFamily = Poppins, fontWeight = FontWeight.Bold, fontSize = 14.sp, color = SobreLaranja)
+        }
+    }
+}
+
+/** Modal com todos os locais do catálogo e um "+" em cada um para montar o roteiro rápido. */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun ModalAdicionarLocais(
+    opcoes: List<OpcaoAdicionar>,
+    totalNoRoteiro: Int,
+    busca: String,
+    onBusca: (String) -> Unit,
+    onAlternar: (OpcaoAdicionar) -> Unit,
+    onFechar: () -> Unit
+) {
+    ModalBottomSheet(
+        onDismissRequest = onFechar,
+        sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
+        containerColor = MaterialTheme.colorScheme.surface
+    ) {
+        Column(Modifier.fillMaxWidth().padding(horizontal = 24.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Column(Modifier.weight(1f)) {
+                    Text("Adicionar ao roteiro", fontFamily = Poppins, fontSize = 22.sp, color = MaterialTheme.colorScheme.onSurface)
+                    // Conta o roteiro inteiro, não só o que aparece na busca
+                    val total = totalNoRoteiro
+                    Text(
+                        if (total == 1) "1 local no seu roteiro" else "$total locais no seu roteiro",
+                        fontFamily = Poppins,
+                        fontSize = 13.sp,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+                BotaoPilula("Pronto", onFechar, fontSize = 14)
+            }
+            OutlinedTextField(
+                value = busca,
+                onValueChange = onBusca,
+                placeholder = { Text("Buscar local ou bairro", fontFamily = Poppins) },
+                leadingIcon = { Icon(Icons.Filled.Search, contentDescription = null) },
+                singleLine = true,
+                shape = RoundedCornerShape(14.dp),
+                colors = OutlinedTextFieldDefaults.colors(focusedBorderColor = Laranja),
+                modifier = Modifier.fillMaxWidth().padding(vertical = 12.dp)
+            )
+        }
+        LazyColumn(
+            contentPadding = PaddingValues(start = 24.dp, end = 24.dp, bottom = 32.dp),
+            verticalArrangement = Arrangement.spacedBy(10.dp),
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            if (opcoes.isEmpty()) {
+                item { Text("Nenhum local encontrado.", fontFamily = Poppins, color = MaterialTheme.colorScheme.onSurfaceVariant) }
+            }
+            items(opcoes, key = { it.local.id }) { opcao ->
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(14.dp))
+                        .clickable { onAlternar(opcao) }
+                        .padding(vertical = 4.dp)
+                ) {
+                    FotoLocal(opcao.local, Modifier.size(60.dp).clip(RoundedCornerShape(12.dp)))
+                    Spacer(Modifier.width(12.dp))
+                    Column(Modifier.weight(1f)) {
+                        Text(
+                            opcao.local.titulo,
+                            fontFamily = Poppins,
+                            fontWeight = FontWeight.Medium,
+                            fontSize = 15.sp,
+                            maxLines = 2,
+                            overflow = TextOverflow.Ellipsis,
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+                        if (opcao.local.bairro.isNotBlank()) {
+                            Text(opcao.local.bairro, fontFamily = Poppins, fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        }
+                    }
+                    // "+" laranja para adicionar; "✓" preenchido quando já está no roteiro
+                    Box(
+                        contentAlignment = Alignment.Center,
+                        modifier = Modifier
+                            .size(40.dp)
+                            .clip(CircleShape)
+                            .background(if (opcao.noRoteiro) Laranja else Color.Transparent)
+                            .border(2.dp, Laranja, CircleShape)
+                    ) {
+                        Icon(
+                            if (opcao.noRoteiro) Icons.Filled.Check else Icons.Filled.Add,
+                            contentDescription = if (opcao.noRoteiro) "Tirar ${opcao.local.titulo} do roteiro" else "Adicionar ${opcao.local.titulo}",
+                            tint = if (opcao.noRoteiro) SobreLaranja else Laranja
+                        )
+                    }
+                }
+            }
         }
     }
 }

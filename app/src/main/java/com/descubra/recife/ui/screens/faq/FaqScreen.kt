@@ -1,35 +1,46 @@
 package com.descubra.recife.ui.screens.faq
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.KeyboardArrowUp
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.descubra.recife.R
-import com.descubra.recife.ui.components.BarraNavegacao
-import com.descubra.recife.ui.components.IconeCanvas
-import com.descubra.recife.ui.components.TipoIcone
-
-// Tela de FAQ original do grupo. Mudanças: pacote, e a barra/ícones foram
-// movidos para ui/components para serem reaproveitados nas outras telas.
+import com.descubra.recife.ui.components.BotaoVoltarCirculo
+import com.descubra.recife.ui.components.CabecalhoBanner
+import com.descubra.recife.ui.components.FolhaConteudo
+import com.descubra.recife.ui.screens.home.HomeUiState
+import com.descubra.recife.ui.theme.Laranja
+import com.descubra.recife.ui.theme.Poppins
+import com.descubra.recife.ui.theme.SobreLaranja
 
 data class FaqItemData(
     val number: String,
@@ -37,288 +48,138 @@ data class FaqItemData(
     val answer: String
 )
 
-@Composable
-fun FaqScreen(
-    isDarkMode: Boolean = false,
-    onHomeClick: () -> Unit = {},
-    onSearchClick: () -> Unit = {},
-    onItineraryClick: () -> Unit = {},
-    onProfileClick: () -> Unit = {},
-    onBackClick: () -> Unit = onHomeClick
-) {
-    val accentOrange = Color(0xFFD97736)
-    // DEFINIÇÃO DINÂMICA DE CORES PARA DARK MODE
-    val lightBackground = if (isDarkMode) Color(0xFF121212) else Color(0xFFFAFAFA)
-    val cardBg = if (isDarkMode) Color(0xFF1E1E1E) else Color(0xFFFAF8F5)
-    val contentSurfaceBg = if (isDarkMode) Color(0xFF181818) else Color.White
-    val textPrimaryColor = if (isDarkMode) Color.White else Color(0xFF1E293B)
-    val textSecondaryColor = if (isDarkMode) Color(0xFFA0A0A0) else Color(0xFF64748B)
-    val badgeBg = if (isDarkMode) Color(0xFF2C2C2C) else Color(0xFFF1E6DF)
-
-    var searchQueryHeader by remember { mutableStateOf("") }
-    var searchQueryContent by remember { mutableStateOf("") }
-
-    val faqList = listOf(
+/** Perguntas da FAQ (texto do grupo, ajustado ao que o app faz hoje) e a busca nelas. */
+object FaqConteudo {
+    val perguntas = listOf(
         FaqItemData(
-            number = "01",
-            question = "Como crio um roteiro personalizado?",
-            answer = "Navegue pelos pontos turísticos, selecione os locais que deseja visitar e toque em \"Adicionar ao Roteiro\"."
+            "01",
+            "Como crio um roteiro personalizado?",
+            "Abra um ponto turístico e toque em \"Adicionar ao Roteiro\". Na aba Roteiro, o botão \"Adicionar locais\" mostra todos os lugares com um \"+\" ao lado para montar o roteiro mais rápido."
         ),
         FaqItemData(
-            number = "02",
-            question = "O aplicativo funciona sem internet / offline?",
-            answer = "Você pode consultar seus roteiros salvos em PDF a qualquer momento, mesmo sem conexão com a internet."
+            "02",
+            "O aplicativo funciona sem internet / offline?",
+            "Sim. O roteiro fica salvo no aparelho e abre mesmo sem conexão. O que você mudar offline é enviado para a sua conta assim que a internet voltar."
         ),
         FaqItemData(
-            number = "03",
-            question = "Como funcionam os horários e valores exibidos?",
-            answer = "Os horários de funcionamento são atualizados constantemente por nossa equipe. Já os valores de entrada e consumo são informativos e sujeitos a alterações pelo próprio estabelecimento."
+            "03",
+            "Como funcionam os horários e valores exibidos?",
+            "Os horários de funcionamento são atualizados constantemente por nossa equipe. Já os valores de entrada e consumo são informativos e sujeitos a alterações pelo próprio estabelecimento."
         ),
         FaqItemData(
-            number = "04",
-            question = "Posso compartilhar meu roteiro com outras pessoas?",
-            answer = "Sim! Ao exportar o seu roteiro em PDF, você pode enviá-lo facilmente via WhatsApp, e-mail ou salvar no seu aplicativo de arquivos para acessar a qualquer momento."
+            "04",
+            "Se eu trocar de celular, perco meu roteiro?",
+            "Não. O roteiro fica guardado na sua conta: é só entrar com o mesmo e-mail ou conta Google em outro aparelho. A data e a hora embaixo de \"Seu Roteiro\" mostram de quando é a versão."
+        ),
+        FaqItemData(
+            "05",
+            "Como troco minha foto de perfil?",
+            "Toque na sua foto (ou inicial) no topo da tela, depois em \"Ver perfil\" e no lápis em cima da foto. Quem entra com a conta Google já começa com a foto do Google."
         )
     )
 
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(lightBackground)
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .verticalScroll(rememberScrollState())
-        ) {
-            // --- CAPA CHEIA PREENCHENDO O TOPO/STATUS BAR ---
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(210.dp)
-            ) {
-                Image(
-                    painter = painterResource(id = R.drawable.bg_banner_recife),
-                    contentDescription = "Fundo do Cabeçalho",
-                    contentScale = ContentScale.Crop,
-                    modifier = Modifier.fillMaxSize()
+    /** Filtra pela pergunta ou pela resposta, sem diferenciar acentos e maiúsculas. */
+    fun buscar(termo: String): List<FaqItemData> =
+        if (termo.isBlank()) perguntas
+        else perguntas.filter { HomeUiState.contemTexto(it.question, termo) || HomeUiState.contemTexto(it.answer, termo) }
+}
+
+/**
+ * FAQ com o mesmo visual das outras telas: banner com a foto do Cliente,
+ * busca (que aqui procura nas perguntas), folha branca e barra de abas.
+ * [onAvatarClick] null = tela aberta antes do login (sem avatar nem menu).
+ */
+@Composable
+fun FaqScreen(
+    inicialCliente: String,
+    fotoCliente: Any?,
+    onAvatarClick: (() -> Unit)?,
+    onVoltar: () -> Unit
+) {
+    var busca by rememberSaveable { mutableStateOf("") }
+    var aberta by rememberSaveable { mutableStateOf<String?>(null) }
+    val itens = FaqConteudo.buscar(busca)
+
+    Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState())) {
+        CabecalhoBanner(
+            inicial = inicialCliente,
+            onAvatarClick = onAvatarClick ?: {},
+            foto = fotoCliente,
+            busca = busca,
+            onBuscaChange = { busca = it },
+            mostrarAvatar = onAvatarClick != null
+        )
+        FolhaConteudo {
+            BotaoVoltarCirculo(onVoltar, Modifier.padding(start = 16.dp))
+            Column(Modifier.padding(horizontal = 32.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                Text(
+                    "Estamos aqui para ajudar você com tudo o que precisar no Descubra Recife",
+                    fontFamily = Poppins,
+                    fontSize = 20.sp,
+                    lineHeight = 26.sp,
+                    color = MaterialTheme.colorScheme.onSurface
                 )
-
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .statusBarsPadding()
-                        .padding(horizontal = 16.dp, vertical = 12.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .size(44.dp)
-                            .clip(CircleShape)
-                            .background(Color.White)
-                            .clickable { onProfileClick() },
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Image(
-                            painter = painterResource(id = R.drawable.foto_perfil),
-                            contentDescription = "Foto de Perfil",
-                            contentScale = ContentScale.Crop,
-                            modifier = Modifier.fillMaxSize()
-                        )
-                    }
-
-                    Spacer(modifier = Modifier.width(12.dp))
-
-                    Surface(
-                        modifier = Modifier
-                            .weight(1f)
-                            .height(42.dp),
-                        shape = RoundedCornerShape(21.dp),
-                        color = if (isDarkMode) Color(0xFF2C2C2C) else Color.White
-                    ) {
-                        Row(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .padding(horizontal = 16.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            BasicTextField(
-                                value = searchQueryHeader,
-                                onValueChange = { searchQueryHeader = it },
-                                modifier = Modifier.weight(1f),
-                                singleLine = true,
-                                textStyle = TextStyle(color = textPrimaryColor, fontSize = 13.sp),
-                                decorationBox = { innerTextField ->
-                                    if (searchQueryHeader.isEmpty()) {
-                                        Text("Pesquise aqui...", color = Color.Gray, fontSize = 13.sp)
-                                    }
-                                    innerTextField()
-                                }
-                            )
-                            IconeCanvas(tipo = TipoIcone.BUSCA, tint = Color.Gray, size = 16.dp)
-                        }
+                Text(
+                    "Encontre respostas rápidas sobre o uso do aplicativo, a criação de roteiros e os atrativos de Recife. Use a busca no topo para filtrar as perguntas.",
+                    fontFamily = Poppins,
+                    fontSize = 13.sp,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                Text(
+                    "Perguntas frequentes",
+                    fontFamily = Poppins,
+                    fontSize = 22.sp,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    modifier = Modifier.padding(top = 14.dp)
+                )
+                if (itens.isEmpty()) {
+                    Text("Nenhuma pergunta encontrada para \"$busca\".", fontFamily = Poppins, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                }
+                itens.forEach { item ->
+                    CartaoPergunta(item, aberta = aberta == item.number || busca.isNotBlank()) {
+                        aberta = if (aberta == item.number) null else item.number
                     }
                 }
             }
-
-            // --- CONTEÚDO PRINCIPAL (COM PREENCHIMENTO COMPLETO) ---
-            Surface(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .fillMaxHeight()
-                    .offset(y = (-20).dp),
-                shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp),
-                color = contentSurfaceBg
-            ) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 20.dp, vertical = 20.dp)
-                        .padding(bottom = 90.dp) // Espaço para rolar o conteúdo por trás da barra sem cobrir os cards
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .size(34.dp)
-                            .clip(CircleShape)
-                            .background(accentOrange)
-                            .clickable { onBackClick() },
-                        contentAlignment = Alignment.Center
-                    ) {
-                        IconeCanvas(tipo = TipoIcone.VOLTAR, tint = Color.White, size = 16.dp)
-                    }
-
-                    Spacer(modifier = Modifier.height(14.dp))
-
-                    Text(
-                        text = "Estamos aqui para ajudar você com tudo o que precisar no Descubra Recife",
-                        fontSize = 16.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = textPrimaryColor,
-                        lineHeight = 22.sp
-                    )
-
-                    Spacer(modifier = Modifier.height(6.dp))
-
-                    Text(
-                        text = "Encontre respostas rápidas sobre o uso do aplicativo, criação de roteiros personalizados e navegação pelos atrativos de Recife.",
-                        fontSize = 12.sp,
-                        color = textSecondaryColor,
-                        lineHeight = 16.sp
-                    )
-
-                    Spacer(modifier = Modifier.height(16.dp))
-
-                    Surface(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(42.dp),
-                        shape = RoundedCornerShape(21.dp),
-                        color = accentOrange
-                    ) {
-                        Row(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .padding(horizontal = 16.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            BasicTextField(
-                                value = searchQueryContent,
-                                onValueChange = { searchQueryContent = it },
-                                modifier = Modifier.weight(1f),
-                                singleLine = true,
-                                textStyle = TextStyle(color = Color.White, fontSize = 13.sp),
-                                decorationBox = { innerTextField ->
-                                    if (searchQueryContent.isEmpty()) {
-                                        Text("Pesquise aqui...", color = Color.White.copy(alpha = 0.8f), fontSize = 13.sp)
-                                    }
-                                    innerTextField()
-                                }
-                            )
-                            IconeCanvas(tipo = TipoIcone.BUSCA, tint = Color.White, size = 16.dp)
-                        }
-                    }
-
-                    Spacer(modifier = Modifier.height(24.dp))
-
-                    Text(
-                        text = "FAQ",
-                        fontSize = 18.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = textPrimaryColor
-                    )
-                    Spacer(modifier = Modifier.height(12.dp))
-
-                    faqList.forEach { item ->
-                        Surface(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(vertical = 4.dp)
-                                .shadow(1.dp, RoundedCornerShape(20.dp)),
-                            shape = RoundedCornerShape(20.dp),
-                            color = cardBg
-                        ) {
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(16.dp),
-                                verticalAlignment = Alignment.Top
-                            ) {
-                                Box(
-                                    modifier = Modifier
-                                        .size(38.dp)
-                                        .clip(CircleShape)
-                                        .background(badgeBg),
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    Text(
-                                        text = item.number,
-                                        fontWeight = FontWeight.Bold,
-                                        fontSize = 14.sp,
-                                        color = textPrimaryColor
-                                    )
-                                }
-
-                                Spacer(modifier = Modifier.width(12.dp))
-
-                                Column(modifier = Modifier.weight(1f)) {
-                                    Text(
-                                        text = item.question,
-                                        fontWeight = FontWeight.Bold,
-                                        fontSize = 13.sp,
-                                        color = textPrimaryColor
-                                    )
-                                    Spacer(modifier = Modifier.height(4.dp))
-                                    Text(
-                                        text = item.answer,
-                                        fontSize = 11.sp,
-                                        color = textSecondaryColor,
-                                        lineHeight = 15.sp
-                                    )
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-        // --- BARRA FLUTUANTE (ALINHADA EXATAMENTE COMO A HOME) ---
-        Box(
-            modifier = Modifier
-                .align(Alignment.BottomCenter)
-                .navigationBarsPadding()
-        ) {
-            BarraNavegacao(
-                onHomeClick = onHomeClick,
-                onSearchClick = onSearchClick,
-                onItineraryClick = onItineraryClick
-            )
         }
     }
 }
 
-@Preview(showBackground = true)
+/** Pergunta que abre e fecha a resposta ao tocar. */
 @Composable
-fun FaqScreenPreview() {
-    FaqScreen()
+private fun CartaoPergunta(item: FaqItemData, aberta: Boolean, onClick: () -> Unit) {
+    Surface(
+        shape = RoundedCornerShape(20.dp),
+        color = MaterialTheme.colorScheme.surfaceVariant,
+        shadowElevation = 1.dp,
+        modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(20.dp)).clickable(onClick = onClick)
+    ) {
+        Row(Modifier.padding(16.dp), verticalAlignment = Alignment.Top) {
+            Box(
+                Modifier.size(38.dp).clip(CircleShape).background(Laranja),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(item.number, fontFamily = Poppins, fontWeight = FontWeight.Bold, fontSize = 14.sp, color = SobreLaranja)
+            }
+            Spacer(Modifier.width(12.dp))
+            Column(Modifier.weight(1f)) {
+                Text(item.question, fontFamily = Poppins, fontWeight = FontWeight.SemiBold, fontSize = 15.sp, color = MaterialTheme.colorScheme.onSurface)
+                if (aberta) {
+                    Text(
+                        item.answer,
+                        fontFamily = Poppins,
+                        fontSize = 13.sp,
+                        lineHeight = 18.sp,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.padding(top = 6.dp)
+                    )
+                }
+            }
+            Icon(
+                if (aberta) Icons.Filled.KeyboardArrowUp else Icons.Filled.KeyboardArrowDown,
+                contentDescription = if (aberta) "Fechar resposta" else "Ver resposta",
+                tint = Laranja
+            )
+        }
+    }
 }
