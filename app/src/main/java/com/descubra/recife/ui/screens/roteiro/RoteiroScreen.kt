@@ -140,10 +140,18 @@ fun RoteiroScreen(
                 return@FolhaConteudo
             }
 
-            Row(Modifier.padding(start = 28.dp, end = 16.dp, top = 12.dp, bottom = 20.dp), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+            // Três botões do mesmo tamanho; nome longo de categoria vira "Gastron…"
+            Row(
+                Modifier.fillMaxWidth().padding(start = 24.dp, end = 24.dp, top = 12.dp, bottom = 20.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
                 var abrirFiltro by remember { mutableStateOf(false) }
-                Box {
-                    PilulaAcao(Icons.Filled.FilterAlt, estado.categorias.find { it.id == estado.filtro }?.nome ?: "Filtros") { abrirFiltro = true }
+                Box(Modifier.weight(1f)) {
+                    PilulaAcao(
+                        Icons.Filled.FilterAlt,
+                        estado.categorias.find { it.id == estado.filtro }?.nome ?: "Filtros",
+                        Modifier.fillMaxWidth()
+                    ) { abrirFiltro = true }
                     DropdownMenu(expanded = abrirFiltro, onDismissRequest = { abrirFiltro = false }) {
                         DropdownMenuItem(text = { Text("Todos", fontFamily = Poppins) }, onClick = { viewModel.filtrar(null); abrirFiltro = false })
                         estado.categorias.forEach { c ->
@@ -151,8 +159,8 @@ fun RoteiroScreen(
                         }
                     }
                 }
-                PilulaAcao(Icons.AutoMirrored.Filled.Sort, if (estado.alfabetica) "A-Z" else "Ordem", viewModel::alternarOrdem)
-                PilulaAcao(Icons.Filled.Add, "Adicionar") { modalAberto = true }
+                PilulaAcao(Icons.AutoMirrored.Filled.Sort, if (estado.alfabetica) "A-Z" else "Ordem", Modifier.weight(1f), viewModel::alternarOrdem)
+                PilulaAcao(Icons.Filled.Add, "Locais", Modifier.weight(1f)) { modalAberto = true }
             }
 
             if (estado.itens.isEmpty()) {
@@ -223,12 +231,24 @@ fun RoteiroScreen(
 }
 
 @Composable
-private fun PilulaAcao(icone: ImageVector, texto: String, onClick: () -> Unit) {
-    Surface(onClick = onClick, color = Laranja, shape = RoundedCornerShape(50)) {
-        Row(Modifier.padding(horizontal = 16.dp, vertical = 7.dp), verticalAlignment = Alignment.CenterVertically) {
-            Icon(icone, contentDescription = null, tint = SobreLaranja, modifier = Modifier.size(20.dp))
-            Spacer(Modifier.width(6.dp))
-            Text(texto, fontFamily = Poppins, fontWeight = FontWeight.Bold, fontSize = 14.sp, color = SobreLaranja)
+private fun PilulaAcao(icone: ImageVector, texto: String, modifier: Modifier = Modifier, onClick: () -> Unit) {
+    Surface(onClick = onClick, color = Laranja, shape = RoundedCornerShape(50), modifier = modifier) {
+        Row(
+            Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Center
+        ) {
+            Icon(icone, contentDescription = null, tint = SobreLaranja, modifier = Modifier.size(18.dp))
+            Spacer(Modifier.width(4.dp))
+            Text(
+                texto,
+                fontFamily = Poppins,
+                fontWeight = FontWeight.Bold,
+                fontSize = 13.sp,
+                color = SobreLaranja,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
         }
     }
 }

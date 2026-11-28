@@ -71,7 +71,12 @@ class AvaliacaoRepositoryDemo : AvaliacaoRepository {
     private val avaliacoes = mutableListOf<Avaliacao>()
     override suspend fun avaliacoesDoLocal(localId: String) = avaliacoes.filter { it.localId == localId }
     override suspend fun avaliar(avaliacao: Avaliacao) {
+        avaliacoes.removeAll { it.id == avaliacao.id }
         avaliacoes += avaliacao
+    }
+
+    override suspend fun excluir(avaliacaoId: String) {
+        avaliacoes.removeAll { it.id == avaliacaoId }
     }
 }
 
@@ -120,10 +125,11 @@ object DadosDemo {
             custoAcesso = "Pago",
             horarioFuncionamento = "Diariamente",
             contato = "",
-            latitude = -8.1225,
-            longitude = -34.9010,
+            latitude = -8.12452,
+            longitude = -34.90454,
             categoriaIds = listOf("gastronomia"),
-            destaque = "popular"
+            destaque = "popular",
+            cardapio = "https://cardap.bodedono.com.br/bode-do-no/boa-viagem"
         ),
         Local(
             id = "paco-do-frevo",

@@ -1,10 +1,40 @@
 {
   "categorias": [
-    { "id": "praias", "nome": "Praias", "icone": "praias", "slug": "praias", "ordem": 1 },
-    { "id": "gastronomia", "nome": "Gastronomia", "icone": "gastronomia", "slug": "gastronomia", "ordem": 2 },
-    { "id": "cultura", "nome": "Cultura", "icone": "cultura", "slug": "cultura", "ordem": 3 },
-    { "id": "folia", "nome": "Folia", "icone": "folia", "slug": "folia", "ordem": 4 },
-    { "id": "historia", "nome": "História", "icone": "historia", "slug": "historia", "ordem": 5 }
+    {
+      "id": "praias",
+      "nome": "Praias",
+      "icone": "praias",
+      "slug": "praias",
+      "ordem": 1
+    },
+    {
+      "id": "gastronomia",
+      "nome": "Gastronomia",
+      "icone": "gastronomia",
+      "slug": "gastronomia",
+      "ordem": 2
+    },
+    {
+      "id": "cultura",
+      "nome": "Cultura",
+      "icone": "cultura",
+      "slug": "cultura",
+      "ordem": 3
+    },
+    {
+      "id": "folia",
+      "nome": "Folia",
+      "icone": "folia",
+      "slug": "folia",
+      "ordem": 4
+    },
+    {
+      "id": "historia",
+      "nome": "História",
+      "icone": "historia",
+      "slug": "historia",
+      "ordem": 5
+    }
   ],
   "locais": [
     {
@@ -16,8 +46,12 @@
       "custoAcesso": "Gratuito",
       "horarioFuncionamento": "Aberto 24h",
       "contato": "",
-      "latitude": -8.0631, "longitude": -34.8711,
-      "categoriaIds": ["historia", "folia"],
+      "latitude": -8.0631,
+      "longitude": -34.8711,
+      "categoriaIds": [
+        "historia",
+        "folia"
+      ],
       "destaque": "popular",
       "ordem": 1
     },
@@ -30,8 +64,12 @@
       "custoAcesso": "Pago (consultar valores)",
       "horarioFuncionamento": "Terça a domingo (consultar horário)",
       "contato": "",
-      "latitude": -8.0464, "longitude": -34.96,
-      "categoriaIds": ["cultura", "historia"],
+      "latitude": -8.05559,
+      "longitude": -34.95901,
+      "categoriaIds": [
+        "cultura",
+        "historia"
+      ],
       "destaque": "popular",
       "ordem": 2
     },
@@ -44,8 +82,13 @@
       "custoAcesso": "Gratuito",
       "horarioFuncionamento": "Feira aos domingos (consultar horário)",
       "contato": "",
-      "latitude": -8.0617, "longitude": -34.8712,
-      "categoriaIds": ["historia", "folia", "gastronomia"],
+      "latitude": -8.0617,
+      "longitude": -34.8712,
+      "categoriaIds": [
+        "historia",
+        "folia",
+        "gastronomia"
+      ],
       "destaque": "popular",
       "ordem": 3
     },
@@ -58,8 +101,11 @@
       "custoAcesso": "Gratuito",
       "horarioFuncionamento": "Aberto 24h",
       "contato": "",
-      "latitude": -8.126, "longitude": -34.899,
-      "categoriaIds": ["praias"],
+      "latitude": -8.126,
+      "longitude": -34.899,
+      "categoriaIds": [
+        "praias"
+      ],
       "destaque": "popular",
       "ordem": 4
     },
@@ -72,8 +118,12 @@
       "custoAcesso": "Pago (consultar valores)",
       "horarioFuncionamento": "Diariamente (consultar horário)",
       "contato": "",
-      "latitude": -8.062, "longitude": -34.8714,
-      "categoriaIds": ["folia", "cultura"],
+      "latitude": -8.062,
+      "longitude": -34.8714,
+      "categoriaIds": [
+        "folia",
+        "cultura"
+      ],
       "destaque": "popular",
       "ordem": 5
     },
@@ -85,11 +135,15 @@
       "bairro": "Boa Viagem",
       "custoAcesso": "Pago",
       "horarioFuncionamento": "Diariamente (consultar horário)",
-      "contato": "",
-      "latitude": -8.1225, "longitude": -34.901,
-      "categoriaIds": ["gastronomia"],
+      "contato": "(81) 3428-8889",
+      "latitude": -8.12452,
+      "longitude": -34.90454,
+      "categoriaIds": [
+        "gastronomia"
+      ],
       "destaque": "popular",
-      "ordem": 6
+      "ordem": 6,
+      "cardapio": "https://cardap.bodedono.com.br/bode-do-no/boa-viagem"
     },
     {
       "id": "centro-de-artesanato",
@@ -100,8 +154,11 @@
       "custoAcesso": "Gratuito",
       "horarioFuncionamento": "Diariamente (consultar horário)",
       "contato": "",
-      "latitude": -8.0598, "longitude": -34.8706,
-      "categoriaIds": ["cultura"],
+      "latitude": -8.06227,
+      "longitude": -34.8707,
+      "categoriaIds": [
+        "cultura"
+      ],
       "destaque": "recomendado",
       "ordem": 7
     },
@@ -114,8 +171,12 @@
       "custoAcesso": "Pago (consultar valores)",
       "horarioFuncionamento": "Terça a domingo (consultar horário)",
       "contato": "",
-      "latitude": -8.0612, "longitude": -34.8719,
-      "categoriaIds": ["folia", "cultura"],
+      "latitude": -8.0612,
+      "longitude": -34.8719,
+      "categoriaIds": [
+        "folia",
+        "cultura"
+      ],
       "destaque": "recomendado",
       "ordem": 8
     },
@@ -128,8 +189,12 @@
       "custoAcesso": "Pago (consultar valores)",
       "horarioFuncionamento": "Terça a domingo (consultar horário)",
       "contato": "",
-      "latitude": -8.0602, "longitude": -34.8702,
-      "categoriaIds": ["cultura", "historia"],
+      "latitude": -8.0602,
+      "longitude": -34.8702,
+      "categoriaIds": [
+        "cultura",
+        "historia"
+      ],
       "ordem": 9
     },
     {
@@ -141,8 +206,11 @@
       "custoAcesso": "Pago (consultar valores)",
       "horarioFuncionamento": "Terça a domingo (consultar horário)",
       "contato": "",
-      "latitude": -8.0618, "longitude": -34.8713,
-      "categoriaIds": ["historia"],
+      "latitude": -8.0618,
+      "longitude": -34.8713,
+      "categoriaIds": [
+        "historia"
+      ],
       "ordem": 10
     },
     {
@@ -154,8 +222,11 @@
       "custoAcesso": "Gratuito (travessia de barco paga)",
       "horarioFuncionamento": "Durante o dia",
       "contato": "",
-      "latitude": -8.0627, "longitude": -34.868,
-      "categoriaIds": ["cultura"],
+      "latitude": -8.06466,
+      "longitude": -34.8695,
+      "categoriaIds": [
+        "cultura"
+      ],
       "ordem": 11
     },
     {
@@ -167,8 +238,11 @@
       "custoAcesso": "Pago (consultar valores)",
       "horarioFuncionamento": "Terça a domingo (consultar horário)",
       "contato": "",
-      "latitude": -8.0414, "longitude": -34.9668,
-      "categoriaIds": ["cultura"],
+      "latitude": -8.05363,
+      "longitude": -34.97416,
+      "categoriaIds": [
+        "cultura"
+      ],
       "ordem": 12
     },
     {
@@ -180,8 +254,12 @@
       "custoAcesso": "Gratuito",
       "horarioFuncionamento": "Segunda a sábado (consultar horário)",
       "contato": "",
-      "latitude": -8.0666, "longitude": -34.8822,
-      "categoriaIds": ["cultura", "historia"],
+      "latitude": -8.0666,
+      "longitude": -34.8822,
+      "categoriaIds": [
+        "cultura",
+        "historia"
+      ],
       "ordem": 13
     },
     {
@@ -193,8 +271,12 @@
       "custoAcesso": "Gratuito",
       "horarioFuncionamento": "Segunda a sábado (consultar horário)",
       "contato": "",
-      "latitude": -8.0687, "longitude": -34.8786,
-      "categoriaIds": ["gastronomia", "historia"],
+      "latitude": -8.0687,
+      "longitude": -34.8786,
+      "categoriaIds": [
+        "gastronomia",
+        "historia"
+      ],
       "ordem": 14
     },
     {
@@ -206,9 +288,29 @@
       "custoAcesso": "Gratuito",
       "horarioFuncionamento": "Aberto 24h",
       "contato": "",
-      "latitude": -8.0945, "longitude": -34.881,
-      "categoriaIds": ["praias"],
+      "latitude": -8.0945,
+      "longitude": -34.881,
+      "categoriaIds": [
+        "praias"
+      ],
       "ordem": 15
+    },
+    {
+      "id": "parraxaxa",
+      "titulo": "Parraxaxá",
+      "descricao": "Restaurante de comida nordestina em clima de cidade do interior, com buffet de pratos típicos como carne de sol, baião de dois, escondidinho e bode guisado.",
+      "endereco": "Av. Fernando Simões Barbosa, 1200 - Boa Viagem, Recife - PE",
+      "bairro": "Boa Viagem",
+      "custoAcesso": "Pago",
+      "horarioFuncionamento": "Diariamente (consultar horário)",
+      "contato": "(81) 3463-7874",
+      "latitude": -8.1279966,
+      "longitude": -34.9021569,
+      "categoriaIds": [
+        "gastronomia"
+      ],
+      "ordem": 16,
+      "cardapio": "https://www.ifood.com.br/delivery/recife-pe/parraxaxa---boa-viagem-boa-viagem/d9d2b770-4c55-4822-af8d-9fa9433bc39c"
     }
   ]
 }

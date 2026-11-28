@@ -1,5 +1,10 @@
 package com.descubra.recife.domain.model
 
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
+import java.util.TimeZone
+
 // Entidades da seção 9 (Arquitetura de Dados) do Documento de Arquitetura.
 // As associativas Categoria_Local e Roteiro_Local viram listas de ids.
 
@@ -39,7 +44,9 @@ data class Local(
     /** "popular" ou "recomendado": em qual seção da tela inicial o local aparece. */
     val destaque: String? = null,
     /** Bairro, mostrado nos cards (o endereço completo fica no detalhe). */
-    val bairro: String = ""
+    val bairro: String = "",
+    /** Link do cardápio online (restaurantes); null nos outros locais. */
+    val cardapio: String? = null
 )
 
 data class Avaliacao(
@@ -48,10 +55,31 @@ data class Avaliacao(
     val localId: String,
     val nota: Int,
     val comentario: String,
-    val data: Long
+    /** Quando a avaliação foi feita (ms). */
+    val data: Long,
+    /** Nome de quem avaliou, gravado junto (o perfil do Cliente é privado). */
+    val clienteNome: String = "",
+    /** Quando foi editada pela última vez; null se nunca foi. */
+    val editadoEm: Long? = null
 ) {
     init {
         require(nota in 1..5) { "A nota deve ser de 1 a 5" }
+    }
+
+    /** Só quem escreveu pode editar ou excluir. */
+    fun eDe(clienteId: String?): Boolean = clienteId != null && clienteId == this.clienteId
+
+    /** Nova versão editada: mantém autor e data original e registra quando mudou. */
+    fun editada(nota: Int, comentario: String, agora: Long): Avaliacao =
+        copy(nota = nota, comentario = comentario.trim(), editadoEm = agora)
+
+    /** "Por Ana · 27/11/2026" e, se editada, "· editada em 27/11/2026 às 21:10". */
+    fun descricao(fuso: TimeZone = TimeZone.getDefault()): String {
+        val autor = clienteNome.ifBlank { "Visitante" }
+        val dia = SimpleDateFormat("dd/MM/yyyy", Locale("pt", "BR")).apply { timeZone = fuso }
+        val diaHora = SimpleDateFormat("dd/MM/yyyy 'às' HH:mm", Locale("pt", "BR")).apply { timeZone = fuso }
+        val base = "$autor · ${dia.format(Date(data))}"
+        return editadoEm?.let { "$base · editada em ${diaHora.format(Date(it))}" } ?: base
     }
 }
 

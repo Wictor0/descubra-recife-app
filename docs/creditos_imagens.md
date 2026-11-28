@@ -12,4 +12,19 @@ As fotos abaixo vieram da **Wikimedia Commons**, que publica imagens sob licenç
 | Mercado de São José | File:Mercado de São José - Recife.jpg |
 | Praia do Pina | File:Praia do Pina - Recife, Pernambuco, Brasil.jpg |
 
-As demais fotos vieram do protótipo no Figma.
+
+## Fotos em alta resolução (substituíram as recortadas do protótipo)
+
+As 8 fotos que vieram do protótipo tinham cerca de 264 px de largura e ficavam borradas. Foram trocadas por fotos da Wikimedia Commons em 1280 px. Bode do Nô e Parraxaxá usam fotos ilustrativas de pratos nordestinos, porque não há fotos livres dos restaurantes.
+
+| Local | Arquivo na Wikimedia Commons | Autor | Licença |
+|---|---|---|---|
+| Artesanato de Pernambuco | File:Centro de Artesanato de Pernambuco, Recife (PE).jpg | Marcos Elias de Oliveira Júnior | CC0 |
+| Bode do Nô (foto ilustrativa: baião de dois) | File:Baião de Dois (superior view).jpg | Senado Federal | CC BY 2.0 |
+| Embaixada dos Bonecos Gigantes | File:Che, Mandela, Lula, Obama e Michael Jackson - Bonecos de Olinda.jpg | Alberto.. | CC BY 2.0 |
+| Feira do Bom Jesus | File:Rua do Bom Jesus - Recife Antigo - Recife, Pernambuco, Brasil.jpg | A. Júnior | CC BY 2.0 |
+| Instituto Ricardo Brennand | File:Castelo Brennand (Instituto Ricardo Brennand) - Recife - Pernambuco - Brasil(2).jpg | Luci Correia | CC BY 2.0 |
+| Parraxaxá (foto ilustrativa: carne de sol) | File:BRUNO LIMA GASTRONOMIA CARNE DE SOL GRAVATÁ PE (40198041084).jpg | MTur Destinos | Public domain |
+| Paço do Frevo | File:2016 - Paço do Frevo - Recife - Pernambuco.jpg | Eduardo Fonseca | CC BY 2.0 |
+| Praia de Boa Viagem | File:Boa Viagem, Recife (20150717-DSC05419).jpg | Matti Blume | CC BY-SA 4.0 |
+| Praça do Marco Zero | File:Praça Rio Branco (Recife).jpg | Wilfredor | CC0 |

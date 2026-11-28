@@ -25,7 +25,8 @@ object Imagens {
         "oficina-brennand" to R.drawable.local_oficina_brennand,
         "casa-da-cultura" to R.drawable.local_casa_da_cultura,
         "mercado-sao-jose" to R.drawable.local_mercado_sao_jose,
-        "praia-do-pina" to R.drawable.local_praia_do_pina
+        "praia-do-pina" to R.drawable.local_praia_do_pina,
+        "parraxaxa" to R.drawable.local_parraxaxa
     )
 
     private val categorias = mapOf(

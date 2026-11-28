@@ -12,6 +12,15 @@ object Mapas {
     fun linkComoChegar(latitude: Double, longitude: Double): String =
         "https://www.google.com/maps/dir/?api=1&destination=$latitude,$longitude"
 
+    /** Abre o cardápio online do restaurante no navegador. */
+    fun abrirLink(context: Context, url: String) {
+        try {
+            context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)))
+        } catch (e: ActivityNotFoundException) {
+            // Sem navegador no aparelho: não há o que abrir.
+        }
+    }
+
     fun abrirComoChegar(context: Context, local: Local) {
         val geo = Intent(
             Intent.ACTION_VIEW,

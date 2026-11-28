@@ -54,7 +54,7 @@ object FaqConteudo {
         FaqItemData(
             "01",
             "Como crio um roteiro personalizado?",
-            "Abra um ponto turístico e toque em \"Adicionar ao Roteiro\". Na aba Roteiro, o botão \"Adicionar locais\" mostra todos os lugares com um \"+\" ao lado para montar o roteiro mais rápido."
+            "Abra um ponto turístico e toque em \"Adicionar ao Roteiro\". Na aba Roteiro, o botão \"+ Locais\" mostra todos os lugares com um \"+\" ao lado para montar o roteiro mais rápido."
         ),
         FaqItemData(
             "02",

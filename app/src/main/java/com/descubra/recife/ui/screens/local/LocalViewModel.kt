@@ -36,6 +36,9 @@ class LocalViewModel(
     private val _estado = MutableStateFlow(LocalUiState())
     val estado: StateFlow<LocalUiState> = _estado
 
+    /** Quem está logado: as avaliações dele aparecem com "Editar" e "Excluir". */
+    val clienteId: StateFlow<String?> = auth.clienteAtualId
+
     val noRoteiro: StateFlow<Boolean> = roteiro.locais
         .map { lista -> lista.any { it.id == localId } }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), false)
@@ -58,11 +61,37 @@ class LocalViewModel(
     fun avaliar(nota: Int, comentario: String) {
         val clienteId = auth.clienteAtualId.value ?: return
         viewModelScope.launch {
+            val nome = runCatching { auth.clienteAtual()?.nome }.getOrNull().orEmpty().trim()
             runCatching {
                 avaliacoes.avaliar(
-                    Avaliacao(UUID.randomUUID().toString(), clienteId, localId, nota, comentario.trim(), System.currentTimeMillis())
+                    Avaliacao(
+                        id = UUID.randomUUID().toString(),
+                        clienteId = clienteId,
+                        localId = localId,
+                        nota = nota,
+                        comentario = comentario.trim(),
+                        data = System.currentTimeMillis(),
+                        clienteNome = nome
+                    )
                 )
             }
+            recarregarAvaliacoes()
+        }
+    }
+
+    /** Salva a edição: mantém autor e data original e registra a data da alteração. */
+    fun editar(original: Avaliacao, nota: Int, comentario: String) {
+        if (!original.eDe(auth.clienteAtualId.value)) return
+        viewModelScope.launch {
+            runCatching { avaliacoes.avaliar(original.editada(nota, comentario, System.currentTimeMillis())) }
+            recarregarAvaliacoes()
+        }
+    }
+
+    fun excluir(avaliacao: Avaliacao) {
+        if (!avaliacao.eDe(auth.clienteAtualId.value)) return
+        viewModelScope.launch {
+            runCatching { avaliacoes.excluir(avaliacao.id) }
             recarregarAvaliacoes()
         }
     }

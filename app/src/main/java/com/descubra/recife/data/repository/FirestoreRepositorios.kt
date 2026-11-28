@@ -18,31 +18,35 @@ import kotlinx.coroutines.tasks.await
 class FirestoreCatalogoRepository(private val db: FirebaseFirestore) : CatalogoRepository {
 
     override suspend fun categorias(): List<Categoria> =
-        servidorOuCache { db.collection(FirestoreColecoes.CATEGORIAS).get(it).await() }
+        servidorOuCache({ it.isEmpty }) { db.collection(FirestoreColecoes.CATEGORIAS).get(it).await() }
             .documents.sortedWith(porOrdem).map { it.paraCategoria() }
 
     override suspend fun locais(categoriaId: String?): List<Local> {
         val colecao = db.collection(FirestoreColecoes.LOCAIS)
         val consulta = if (categoriaId == null) colecao else colecao.whereArrayContains("categoriaIds", categoriaId)
-        return servidorOuCache { consulta.get(it).await() }.documents.sortedWith(porOrdem).map { it.paraLocal() }
+        return servidorOuCache({ it.isEmpty }) { consulta.get(it).await() }.documents.sortedWith(porOrdem).map { it.paraLocal() }
     }
 
     override suspend fun local(id: String): Local? {
-        val doc = servidorOuCache { db.collection(FirestoreColecoes.LOCAIS).document(id).get(it).await() }
+        val doc = servidorOuCache({ !it.exists() }) { db.collection(FirestoreColecoes.LOCAIS).document(id).get(it).await() }
         return if (doc.exists()) doc.paraLocal() else null
     }
 
     /**
      * Sem internet o Firestore fica tentando o servidor por vários segundos antes
      * de usar o cache. Aqui o app espera no máximo [ESPERA_SERVIDOR_MS] e então
-     * mostra a cópia guardada no aparelho.
+     * mostra a cópia guardada no aparelho. Se o aparelho ainda não tem cópia
+     * (primeiro acesso), espera o servidor normalmente em vez de mostrar vazio.
      */
-    private suspend fun <T> servidorOuCache(ler: suspend (Source) -> T): T =
+    private suspend fun <T> servidorOuCache(semDados: (T) -> Boolean, ler: suspend (Source) -> T): T {
         try {
-            withTimeout(ESPERA_SERVIDOR_MS) { ler(Source.SERVER) }
+            return withTimeout(ESPERA_SERVIDOR_MS) { ler(Source.SERVER) }
         } catch (e: Exception) {
-            ler(Source.CACHE)
+            val doCache = runCatching { ler(Source.CACHE) }.getOrNull()
+            if (doCache != null && !semDados(doCache)) return doCache
         }
+        return ler(Source.DEFAULT)
+    }
 
     private companion object {
         const val ESPERA_SERVIDOR_MS = 4_000L
@@ -60,7 +64,9 @@ class FirestoreAvaliacaoRepository(private val db: FirebaseFirestore) : Avaliaca
                     localId = localId,
                     nota = doc.getLong("nota")?.toInt() ?: 1,
                     comentario = doc.getString("comentario").orEmpty(),
-                    data = doc.getLong("data") ?: 0L
+                    data = doc.getLong("data") ?: 0L,
+                    clienteNome = doc.getString("clienteNome").orEmpty(),
+                    editadoEm = doc.getLong("editadoEm")
                 )
             }
 
@@ -71,9 +77,15 @@ class FirestoreAvaliacaoRepository(private val db: FirebaseFirestore) : Avaliaca
                 "localId" to avaliacao.localId,
                 "nota" to avaliacao.nota,
                 "comentario" to avaliacao.comentario,
-                "data" to avaliacao.data
+                "data" to avaliacao.data,
+                "clienteNome" to avaliacao.clienteNome,
+                "editadoEm" to avaliacao.editadoEm
             )
         ).await()
+    }
+
+    override suspend fun excluir(avaliacaoId: String) {
+        db.collection(FirestoreColecoes.AVALIACOES).document(avaliacaoId).delete().await()
     }
 }
 
@@ -157,5 +169,6 @@ private fun DocumentSnapshot.paraLocal() = Local(
     categoriaIds = get("categoriaIds") as? List<String> ?: emptyList(),
     imagens = get("imagens") as? List<String> ?: emptyList(),
     destaque = getString("destaque"),
-    bairro = getString("bairro").orEmpty()
+    bairro = getString("bairro").orEmpty(),
+    cardapio = getString("cardapio")?.takeIf { it.startsWith("https://") }
 )

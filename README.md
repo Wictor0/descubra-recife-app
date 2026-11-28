@@ -195,9 +195,12 @@ No Android Studio: botão direito na pasta `app/src/test/java/com/descubra/recif
 | `TelasTest` | ViewModel da tela inicial (carregar, filtrar, buscar, erro sem internet) e filtros do roteiro | 5 |
 | `DataNascimentoTest` | Máscara dd/mm/aaaa e validação de datas | 4 |
 | `RegrasTest` | Regras do roteiro, avaliação, busca e cadastro | 6 |
+| `AvaliacaoTest` | Avaliação com nome e data, edição (data da alteração) e exclusão só pelo autor | 5 |
 | `MapasTest` | Link do "Como chegar" | 1 |
 
 ## Sistemas distribuídos no app
+
+Explicação completa, com exemplos e as regras de conflito: [`docs/sistemas_distribuidos.md`](docs/sistemas_distribuidos.md).
 
 O app trabalha com três formas de sistemas distribuídos:
 
@@ -212,9 +215,11 @@ Na prática: se o Cliente entra na conta em outro celular, perde o aparelho ou l
 ## 3. Próximos passos
 
 - [x] Criar o projeto no Firebase (`descubra-recife`, apps dev e prod)
-- [ ] Rodar o script de cadastro do catálogo e revisar as coordenadas
+- [x] Rodar o script de cadastro do catálogo e revisar as coordenadas (16 locais; coordenadas conferidas com o OpenStreetMap e 5 corrigidas em 27/11/2026)
 - [x] Foto de perfil do cliente (foto da conta Google ou escolhida na galeria, guardada no perfil)
 - [x] Aplicar o visual do protótipo nas telas
-- [ ] Trocar as fotos recortadas do protótipo por fotos em boa resolução
+- [x] Trocar as fotos recortadas do protótipo por fotos em boa resolução (1280 px, Wikimedia Commons)
 - [x] Exibir fotos dos locais (fotos embutidas; locais novos usam a URL do campo `imagens`, carregada com Coil). Créditos em [`docs/creditos_imagens.md`](docs/creditos_imagens.md)
-- [ ] Ajustar a FAQ: ela cita exportação em PDF, que no documento é evolução futura (seção 24)
+- [x] Ajustar a FAQ: as respostas sobre PDF foram trocadas pelo roteiro offline e salvo na conta; a tela usa o visual do app
+- [x] Avaliações com nome de quem avaliou e data; o autor pode editar (aparece "editada em …") ou excluir
+- [x] Botão "Ver cardápio" nos restaurantes (campo `cardapio` no Firestore): Bode do Nô (unidade Boa Viagem) e Parraxaxá

@@ -41,7 +41,9 @@ interface CatalogoRepository {
 
 interface AvaliacaoRepository {
     suspend fun avaliacoesDoLocal(localId: String): List<Avaliacao>
+    /** Cria a avaliação, ou grava por cima a versão editada (mesmo id). */
     suspend fun avaliar(avaliacao: Avaliacao)
+    suspend fun excluir(avaliacaoId: String)
 }
 
 interface RoteiroRepository {
