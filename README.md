@@ -200,8 +200,6 @@ No Android Studio: botão direito na pasta `app/src/test/java/com/descubra/recif
 
 ## Sistemas distribuídos no app
 
-Explicação completa, com exemplos e as regras de conflito: [`docs/sistemas_distribuidos.md`](docs/sistemas_distribuidos.md).
-
 O app trabalha com três formas de sistemas distribuídos:
 
 1. **Replicação com consistência eventual (offline-first).** O roteiro existe em duas réplicas: o Room, no aparelho, e o Firestore, na nuvem. A tela sempre lê do aparelho, então funciona sem internet. Com conexão, toda vez que a aba Roteiro é aberta, o app busca a versão do servidor (`Source.SERVER`), sobe o que foi feito offline e baixa a versão mais nova. Conflitos são resolvidos por **last-write-wins**: vence a alteração com o horário mais recente. Código: `data/repository/Sincronizacao.kt` e `RoteiroRepositoryImpl.kt`. Testes: `SincronizacaoTest` e `RoteiroRepositoryTest`.
